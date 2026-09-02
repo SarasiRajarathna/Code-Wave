@@ -5,11 +5,30 @@ import json
 from pathlib import Path
 from ingest.loaders import load_file
 from ingest.processors.wiki import process_wiki_page
+from ingest.processors.codex import extract_plate_text, merge_plates_into_pages
 
 corpus_root = Path('data/corpus')          # your real corpus location
 output_dir = Path('data/extracted')        # one JSON file per folder goes here
 
 output_dir.mkdir(parents=True, exist_ok=True)
+
+
+def dedupe_by_basename(files: list[Path]) -> list[Path]:
+    """If both book.pdf and book.docx exist, keep only the PDF -- PDF
+    gives us real page numbers, which the chapter grouping and plate
+    OCR both depend on. Prevents embedding every book twice."""
+    by_stem = {}
+    for f in files:
+        stem = f.stem.lower()
+        if stem not in by_stem:
+            by_stem[stem] = f
+        elif f.suffix.lower() == '.pdf':
+            print(f'  Skipping duplicate: {by_stem[stem].name} (keeping .pdf version instead)')
+            by_stem[stem] = f
+        else:
+            print(f'  Skipping duplicate: {f.name} (keeping .pdf version instead)')
+    return list(by_stem.values())
+
 
 for folder in ['chronicles', 'wiki', 'codex', 'ephemera']:
     folder_path = corpus_root / folder
@@ -18,15 +37,23 @@ for folder in ['chronicles', 'wiki', 'codex', 'ephemera']:
         continue
 
     folder_pages = []
+    candidate_files = [f for f in folder_path.glob('*') if f.suffix.lower() in ('.pdf', '.docx', '.md', '.txt')]
+    files = dedupe_by_basename(candidate_files)
 
-    for f in folder_path.glob('*'):
-        if f.suffix.lower() not in ('.pdf', '.docx', '.md', '.txt'):
-            continue
+    for f in files:
         print(f'Processing {f} ...')
         try:
             pages = load_file(str(f))
+
             if folder == 'wiki':
                 pages = [process_wiki_page(p) for p in pages]
+
+            if folder == 'codex' and f.suffix.lower() == '.pdf':
+                plates = extract_plate_text(str(f))
+                pages = merge_plates_into_pages(pages, plates)
+                if plates:
+                    print(f'  -> OCR found {len(plates)} figure plate(s) on this file')
+
             folder_pages.extend(pages)
         except Exception as e:
             print(f'  FAILED: {e}')

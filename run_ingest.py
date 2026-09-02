@@ -4,6 +4,7 @@ sys.path.insert(0, 'src')
 import json
 from pathlib import Path
 from ingest.loaders import load_file
+from ingest.processors.wiki import process_wiki_page
 
 corpus_root = Path('data/corpus')          # your real corpus location
 output_dir = Path('data/extracted')        # one JSON file per folder goes here
@@ -24,6 +25,8 @@ for folder in ['chronicles', 'wiki', 'codex', 'ephemera']:
         print(f'Processing {f} ...')
         try:
             pages = load_file(str(f))
+            if folder == 'wiki':
+                pages = [process_wiki_page(p) for p in pages]
             folder_pages.extend(pages)
         except Exception as e:
             print(f'  FAILED: {e}')

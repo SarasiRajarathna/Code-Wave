@@ -2,3 +2,6 @@ pymupdf
 python-docx
 pytesseract
 pillow
+chromadb
+sentence-transformers
+voyageai

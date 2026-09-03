@@ -1,13 +1,11 @@
 """
 loaders.py
 
-Turns raw archive files (PDF, DOCX, Markdown) into a common format:
+Turns raw archive files (PDF, DOCX, Markdown, images) into a common format:
 a list of "pages" where each page is a dict with the extracted text
 plus metadata about where it came from.
 
-Why a common format matters: everything downstream (chunking, embedding,
-storing) doesn't need to know or care what file type the text originally
-came from. Every loader in this file returns the same shape:
+Every loader in this file returns the same shape:
 
     [
         {
@@ -15,18 +13,16 @@ came from. Every loader in this file returns the same shape:
             "source_file": "chronicles/book1_ch3.pdf",
             "source_type": "chronicles",   # top-level folder: chronicles/wiki/codex/ephemera/images
             "page": 3,                      # page number if applicable, else None
+            "has_ocr": False,
         },
         ...
     ]
-
-This metadata is what lets the retrieval agent later say "this came from
-an official codex" vs "this came from an unreliable in-world letter" --
-important for track 1C, where sources can disagree.
 """
 
 from pathlib import Path
 import pymupdf as fitz
 import docx  # python-docx
+from ingest.processors.ocr import ocr_pdf_page, ocr_image_file
 
 
 def _source_type_from_path(path: Path) -> str:
@@ -41,11 +37,8 @@ def _source_type_from_path(path: Path) -> str:
 def load_pdf(path: str) -> list[dict]:
     """Extract text from a PDF, one entry per page.
 
-    NOTE: this only extracts text that's already selectable/embedded in the
-    PDF. Scanned pages (an image of text, no real text layer) will come back
-    empty here -- those need OCR instead. See ocr.py once you get there.
-    A quick way to check: if a page's extracted text is empty or very short
-    relative to the page, it's probably a scan.
+    If a page has very little selectable text (< 30 chars) -- typical for scanned PDFs
+    like *.scan.pdf -- automatic full-page OCR is executed using PyMuPDF + Tesseract.
     """
     path = Path(path)
     source_type = _source_type_from_path(path)
@@ -54,21 +47,28 @@ def load_pdf(path: str) -> list[dict]:
     doc = fitz.open(path)
     for page_num, page in enumerate(doc, start=1):
         text = page.get_text().strip()
+        has_ocr = False
+        
+        # Automatic OCR fallback for scanned pages or images of text
+        if len(text) < 30:
+            ocr_text = ocr_pdf_page(page)
+            if ocr_text:
+                text = ocr_text
+                has_ocr = True
+
         pages.append({
             "text": text,
             "source_file": str(path),
             "source_type": source_type,
             "page": page_num,
+            "has_ocr": has_ocr,
         })
     doc.close()
     return pages
 
 
 def load_docx(path: str) -> list[dict]:
-    """Extract text from a DOCX file. DOCX has no real concept of 'pages'
-    (that's a rendering-time thing in Word), so we return the whole document
-    as one entry. If a document is long, the chunker will split it later
-    anyway."""
+    """Extract text from a DOCX file as one document entry."""
     path = Path(path)
     source_type = _source_type_from_path(path)
 
@@ -80,12 +80,12 @@ def load_docx(path: str) -> list[dict]:
         "source_file": str(path),
         "source_type": source_type,
         "page": None,
+        "has_ocr": False,
     }]
 
 
 def load_markdown(path: str) -> list[dict]:
-    """Load a Markdown file as plain text. Wiki articles are Markdown per
-    the README, so this is straightforward -- no library needed."""
+    """Load a Markdown or TXT file as plain text."""
     path = Path(path)
     source_type = _source_type_from_path(path)
 
@@ -96,21 +96,42 @@ def load_markdown(path: str) -> list[dict]:
         "source_file": str(path),
         "source_type": source_type,
         "page": None,
+        "has_ocr": False,
+    }]
+
+
+def load_image(path: str) -> list[dict]:
+    """Load a standalone image file (PNG/JPG), extract text using OCR,
+    and attach descriptive title metadata."""
+    path = Path(path)
+    source_type = _source_type_from_path(path)
+
+    ocr_text = ocr_image_file(str(path))
+    clean_title = path.stem.replace("_", " ").title()
+    full_text = f"Image Plate: {clean_title}\n\n[OCR EXTRACTED TEXT]\n{ocr_text}" if ocr_text else f"Image Plate: {clean_title}"
+
+    return [{
+        "text": full_text,
+        "source_file": str(path),
+        "source_type": source_type,
+        "page": None,
+        "title": clean_title,
+        "has_ocr": True,
     }]
 
 
 def load_file(path: str) -> list[dict]:
-    """Dispatch to the right loader based on file extension. This is the
-    function the main pipeline script will actually call -- it doesn't need
-    to know which loader handles which extension."""
+    """Dispatch to the right loader based on file extension."""
     path = Path(path)
     ext = path.suffix.lower()
 
     if ext == ".pdf":
-        return load_pdf(path)
+        return load_pdf(str(path))
     elif ext == ".docx":
-        return load_docx(path)
+        return load_docx(str(path))
     elif ext in {".md", ".txt"}:
-        return load_markdown(path)
+        return load_markdown(str(path))
+    elif ext in {".png", ".jpg", ".jpeg"}:
+        return load_image(str(path))
     else:
         raise ValueError(f"No loader for file type: {ext} ({path})")

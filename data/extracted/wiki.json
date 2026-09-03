@@ -4,6 +4,7 @@
     "source_file": "data\\corpus\\wiki\\aldous_wrenfield_the_last_warden.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Aldous Wrenfield the Last Warden",
     "wikilinks": [
       "Fenspire",
@@ -27,6 +28,7 @@
     "source_file": "data\\corpus\\wiki\\ashfall_colossus.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ashfall Colossus (creature)",
     "wikilinks": [
       "Ashfall Colossus",
@@ -46,6 +48,7 @@
     "source_file": "data\\corpus\\wiki\\ashreach.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ashreach",
     "wikilinks": [
       "The Weeping Marshes",
@@ -64,6 +67,7 @@
     "source_file": "data\\corpus\\wiki\\blackford.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Blackford",
     "wikilinks": [
       "The Pale Coast",
@@ -82,6 +86,7 @@
     "source_file": "data\\corpus\\wiki\\brannoc_ironmere_the_red_handed.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Brannoc Ironmere the Red-Handed",
     "wikilinks": [
       "Brannoc Ironmere the Red-Handed",
@@ -114,6 +119,7 @@
     "source_file": "data\\corpus\\wiki\\bryony_nightbrook.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Bryony Nightbrook",
     "wikilinks": [
       "Bryony Nightbrook",
@@ -138,6 +144,7 @@
     "source_file": "data\\corpus\\wiki\\caedmon_fellgard.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Caedmon Fellgard",
     "wikilinks": [
       "Caedmon Fellgard",
@@ -160,6 +167,7 @@
     "source_file": "data\\corpus\\wiki\\caedmon_hollowmere.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Caedmon Hollowmere",
     "wikilinks": [
       "Ashen Era",
@@ -182,6 +190,7 @@
     "source_file": "data\\corpus\\wiki\\cerys_sablewood_the_ashen.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Cerys Sablewood the Ashen]]",
     "wikilinks": [
       "Cerys Sablewood the Ashen",
@@ -207,6 +216,7 @@
     "source_file": "data\\corpus\\wiki\\chalice_of_ashdeep.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Chalice of Ashdeep]] (artifact)",
     "wikilinks": [
       "Chalice of Ashdeep",
@@ -229,6 +239,7 @@
     "source_file": "data\\corpus\\wiki\\cindermere_hold.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Cindermere Hold",
     "wikilinks": [
       "The High Spires",
@@ -247,6 +258,7 @@
     "source_file": "data\\corpus\\wiki\\cinder_shrike.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Cinder Shrike (creature)",
     "wikilinks": [
       "Mournwatch"
@@ -266,6 +278,7 @@
     "source_file": "data\\corpus\\wiki\\corvus_hollowmere_the_pale.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Corvus Hollowmere the Pale]] (character)",
     "wikilinks": [
       "Corvus Hollowmere the Pale",
@@ -292,6 +305,7 @@
     "source_file": "data\\corpus\\wiki\\crookgate_keep.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Crookgate Keep",
     "wikilinks": [
       "Weeping Marshes",
@@ -311,6 +325,7 @@
     "source_file": "data\\corpus\\wiki\\crookvale.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Crookvale",
     "wikilinks": [
       "Crookvale",
@@ -333,6 +348,7 @@
     "source_file": "data\\corpus\\wiki\\diadem_of_sorrowgate.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Diadem of Sorrowgate]] (artifact)",
     "wikilinks": [
       "Diadem of Sorrowgate",
@@ -354,6 +370,7 @@
     "source_file": "data\\corpus\\wiki\\draven_ashgrove.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Draven Ashgrove",
     "wikilinks": [
       "Ashen Era",
@@ -376,6 +393,7 @@
     "source_file": "data\\corpus\\wiki\\ederon_coldwater.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ederon Coldwater",
     "wikilinks": [
       "Ederon Coldwater",
@@ -396,6 +414,7 @@
     "source_file": "data\\corpus\\wiki\\ederon_fellgard.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ederon Fellgard",
     "wikilinks": [
       "Ashen Era",
@@ -417,6 +436,7 @@
     "source_file": "data\\corpus\\wiki\\edge_of_gloamreach.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Edge of Gloamreach (artifact)",
     "wikilinks": [
       "Blackford",
@@ -438,6 +458,7 @@
     "source_file": "data\\corpus\\wiki\\embercrag_fortress.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Embercrag Fortress",
     "wikilinks": [
       "Embercrag Fortress",
@@ -458,6 +479,7 @@
     "source_file": "data\\corpus\\wiki\\emberdeep.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Emberdeep",
     "wikilinks": [
       "Emberdeep",
@@ -480,6 +502,7 @@
     "source_file": "data\\corpus\\wiki\\embermarch.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Embermarch",
     "wikilinks": [
       "The Gloaming Reach",
@@ -502,6 +525,7 @@
     "source_file": "data\\corpus\\wiki\\fenspire.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Fenspire]]",
     "wikilinks": [
       "Fenspire",
@@ -526,6 +550,7 @@
     "source_file": "data\\corpus\\wiki\\fenthrone.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Fenthrone",
     "wikilinks": [
       "Pale Coast",
@@ -548,6 +573,7 @@
     "source_file": "data\\corpus\\wiki\\gareth_ironmere.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Gareth Ironmere",
     "wikilinks": [
       "The Bleeding Crown",
@@ -566,6 +592,7 @@
     "source_file": "data\\corpus\\wiki\\gauntlet_of_sorrowfell.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Gauntlet of Sorrowfell",
     "wikilinks": [
       "Gauntlet of Sorrowfell",
@@ -588,6 +615,7 @@
     "source_file": "data\\corpus\\wiki\\gloammarch.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Gloammarch",
     "wikilinks": [
       "Gloammarch",
@@ -608,6 +636,7 @@
     "source_file": "data\\corpus\\wiki\\gloamreach.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Gloamreach]] (location)",
     "wikilinks": [
       "Gloamreach",
@@ -632,6 +661,7 @@
     "source_file": "data\\corpus\\wiki\\gravemaw_wyrm.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Gravemaw Wyrm",
     "wikilinks": [
       "Marrowwell Abbey"
@@ -648,6 +678,7 @@
     "source_file": "data\\corpus\\wiki\\greyfell_citadel.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Greyfell Citadel",
     "wikilinks": [
       "the Shattered Vale",
@@ -669,6 +700,7 @@
     "source_file": "data\\corpus\\wiki\\greythrone.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Greythrone",
     "wikilinks": [
       "Gloaming Reach",
@@ -688,6 +720,7 @@
     "source_file": "data\\corpus\\wiki\\halvard_vane_the_grave_sworn.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Halvard Vane the Grave-Sworn",
     "wikilinks": [
       "Halvard Vane the Grave-Sworn",
@@ -712,6 +745,7 @@
     "source_file": "data\\corpus\\wiki\\hesper_wrenfield.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Hesper Wrenfield",
     "wikilinks": [
       "Ashen Era",
@@ -732,6 +766,7 @@
     "source_file": "data\\corpus\\wiki\\hollowreach.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Hollowreach",
     "wikilinks": [
       "Hollowreach",
@@ -754,6 +789,7 @@
     "source_file": "data\\corpus\\wiki\\hollowvale.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Hollowvale",
     "wikilinks": [
       "Blood-Moor",
@@ -772,6 +808,7 @@
     "source_file": "data\\corpus\\wiki\\house_morvain.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "House Morvain",
     "wikilinks": [
       "Sunder-Kings",
@@ -797,6 +834,7 @@
     "source_file": "data\\corpus\\wiki\\ignatz_ashgrove_the_oathless.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ignatz Ashgrove the Oathless",
     "wikilinks": [
       "Ignatz Ashgrove the Oathless",
@@ -831,6 +869,7 @@
     "source_file": "data\\corpus\\wiki\\ignatz_cindervale.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ignatz Cindervale",
     "wikilinks": [
       "Ignatz Cindervale",
@@ -850,6 +889,7 @@
     "source_file": "data\\corpus\\wiki\\ignatz_marrowgate.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ignatz Marrowgate",
     "wikilinks": [
       "Ashen Era",
@@ -870,6 +910,7 @@
     "source_file": "data\\corpus\\wiki\\ironfell_citadel.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ironfell Citadel",
     "wikilinks": [
       "Ironfell Citadel",
@@ -893,6 +934,7 @@
     "source_file": "data\\corpus\\wiki\\isolde_fellgard_the_unforgiven.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Isolde Fellgard the Unforgiven",
     "wikilinks": [
       "Isolde Fellgard the Unforgiven",
@@ -923,6 +965,7 @@
     "source_file": "data\\corpus\\wiki\\isolde_mournvale.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Isolde Mournvale]] (character)",
     "wikilinks": [
       "Isolde Mournvale",
@@ -943,6 +986,7 @@
     "source_file": "data\\corpus\\wiki\\isolde_nightbrook.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Isolde Nightbrook",
     "wikilinks": [
       "The Iron-Ring Cartel",
@@ -964,6 +1008,7 @@
     "source_file": "data\\corpus\\wiki\\korvath_greyfen.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Korvath Greyfen",
     "wikilinks": [
       "Korvath Greyfen",
@@ -984,6 +1029,7 @@
     "source_file": "data\\corpus\\wiki\\korvath_nightbrook.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Korvath Nightbrook",
     "wikilinks": [
       "Korvath Nightbrook",
@@ -1004,6 +1050,7 @@
     "source_file": "data\\corpus\\wiki\\lantern_moth_swarm.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Lantern Moth Swarm (creature)",
     "wikilinks": [
       "Lantern Moth Swarm",
@@ -1025,6 +1072,7 @@
     "source_file": "data\\corpus\\wiki\\lysandra_ashgrove.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Lysandra Ashgrove",
     "wikilinks": [
       "Lysandra Ashgrove",
@@ -1045,6 +1093,7 @@
     "source_file": "data\\corpus\\wiki\\maelis_greyfen.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Maelis Greyfen]]",
     "wikilinks": [
       "Maelis Greyfen",
@@ -1065,6 +1114,7 @@
     "source_file": "data\\corpus\\wiki\\maelis_harrowick_the_pale.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Maelis Harrowick the Pale",
     "wikilinks": [
       "Court Chronicler",
@@ -1093,6 +1143,7 @@
     "source_file": "data\\corpus\\wiki\\maelis_wrenfield.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Maelis Wrenfield",
     "wikilinks": [
       "Ashen Era",
@@ -1112,6 +1163,7 @@
     "source_file": "data\\corpus\\wiki\\malchior_cindervale_the_flame_touched.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Malchior Cindervale the Flame-Touched",
     "wikilinks": [
       "The Iron-Ring Cartel",
@@ -1138,6 +1190,7 @@
     "source_file": "data\\corpus\\wiki\\marrowwatch.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Marrowwatch",
     "wikilinks": [
       "The Ash Wastes",
@@ -1157,6 +1210,7 @@
     "source_file": "data\\corpus\\wiki\\marrowwell_abbey.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Marrowwell Abbey]]",
     "wikilinks": [
       "Marrowwell Abbey",
@@ -1179,6 +1233,7 @@
     "source_file": "data\\corpus\\wiki\\marsh_revenant.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Marsh Revenant (creature)",
     "wikilinks": [
       "Marsh Revenant",
@@ -1197,6 +1252,7 @@
     "source_file": "data\\corpus\\wiki\\morwenna_ashgrove.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Morwenna Ashgrove",
     "wikilinks": [
       "Morwenna Ashgrove",
@@ -1225,6 +1281,7 @@
     "source_file": "data\\corpus\\wiki\\morwenna_morvain.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Morwenna Morvain]]",
     "wikilinks": [
       "Morwenna Morvain",
@@ -1246,6 +1303,7 @@
     "source_file": "data\\corpus\\wiki\\morwenna_vane.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Morwenna Vane",
     "wikilinks": [
       "The Bleeding Crown",
@@ -1265,6 +1323,7 @@
     "source_file": "data\\corpus\\wiki\\morwenna_vosgard.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Morwenna Vosgard]]",
     "wikilinks": [
       "Morwenna Vosgard",
@@ -1286,6 +1345,7 @@
     "source_file": "data\\corpus\\wiki\\mournwatch.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Mournwatch]] (location)",
     "wikilinks": [
       "Mournwatch",
@@ -1308,6 +1368,7 @@
     "source_file": "data\\corpus\\wiki\\ossric_ravensmoor.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ossric Ravensmoor",
     "wikilinks": [
       "Ossric Ravensmoor",
@@ -1327,6 +1388,7 @@
     "source_file": "data\\corpus\\wiki\\ossric_wrenfield.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ossric Wrenfield (character)",
     "wikilinks": [
       "Ashen Era",
@@ -1346,6 +1408,7 @@
     "source_file": "data\\corpus\\wiki\\palewell_abbey.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Palewell Abbey]]",
     "wikilinks": [
       "Palewell Abbey",
@@ -1370,6 +1433,7 @@
     "source_file": "data\\corpus\\wiki\\pale_stag_of_omens.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Pale Stag of Omens",
     "wikilinks": [
       "Pale Stag of Omens",
@@ -1388,6 +1452,7 @@
     "source_file": "data\\corpus\\wiki\\ravena_harrowick.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ravena Harrowick (character)",
     "wikilinks": [
       "Ravena Harrowick",
@@ -1408,6 +1473,7 @@
     "source_file": "data\\corpus\\wiki\\ravena_stormwell.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Ravena Stormwell",
     "wikilinks": [
       "The Silent Choir",
@@ -1427,6 +1493,7 @@
     "source_file": "data\\corpus\\wiki\\sabelle_blackspire.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Sabelle Blackspire (character)",
     "wikilinks": [
       "The Ashen Vanguard",
@@ -1448,6 +1515,7 @@
     "source_file": "data\\corpus\\wiki\\sabelle_mournvale_the_twice_crowned.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Sabelle Mournvale the Twice-Crowned]]",
     "wikilinks": [
       "Sabelle Mournvale the Twice-Crowned",
@@ -1477,6 +1545,7 @@
     "source_file": "data\\corpus\\wiki\\salt_blind_leviathan.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Salt-Blind Leviathan]] (creature)",
     "wikilinks": [
       "Salt-Blind Leviathan",
@@ -1495,6 +1564,7 @@
     "source_file": "data\\corpus\\wiki\\serathiel_vane.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Serathiel Vane]] (character)",
     "wikilinks": [
       "Serathiel Vane",
@@ -1516,6 +1586,7 @@
     "source_file": "data\\corpus\\wiki\\stormmarch.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Stormmarch",
     "wikilinks": [
       "Stormmarch",
@@ -1535,6 +1606,7 @@
     "source_file": "data\\corpus\\wiki\\the_accord_of_mournthrone.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[The Accord of Mournthrone]] (conflict)",
     "wikilinks": [
       "The Accord of Mournthrone",
@@ -1562,6 +1634,7 @@
     "source_file": "data\\corpus\\wiki\\the_ashen_vanguard.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Ashen Vanguard (faction)",
     "wikilinks": [
       "The Ashen Vanguard",
@@ -1592,6 +1665,7 @@
     "source_file": "data\\corpus\\wiki\\the_bleeding_crown.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Bleeding Crown",
     "wikilinks": [
       "The Bleeding Crown",
@@ -1616,6 +1690,7 @@
     "source_file": "data\\corpus\\wiki\\the_cinder_wrought_aegis.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Cinder-Wrought Aegis",
     "wikilinks": [
       "The Cinder-Wrought Aegis",
@@ -1635,6 +1710,7 @@
     "source_file": "data\\corpus\\wiki\\the_crown_of_burned_names.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Crown of Burned Names (artifact)",
     "wikilinks": [
       "The Crown of Burned Names",
@@ -1656,6 +1732,7 @@
     "source_file": "data\\corpus\\wiki\\the_hollow_edge.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Hollow Edge (artifact)",
     "wikilinks": [
       "Hollowvale",
@@ -1676,6 +1753,7 @@
     "source_file": "data\\corpus\\wiki\\the_iron_ring_cartel.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Iron-Ring Cartel (faction)",
     "wikilinks": [
       "Hollowreach",
@@ -1698,6 +1776,7 @@
     "source_file": "data\\corpus\\wiki\\the_leaden_accord.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Leaden Accord",
     "wikilinks": [
       "The Leaden Accord",
@@ -1729,6 +1808,7 @@
     "source_file": "data\\corpus\\wiki\\the_psalter_of_seven_sorrows.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Psalter of Seven Sorrows (artifact)",
     "wikilinks": [
       "The Psalter of Seven Sorrows",
@@ -1751,6 +1831,7 @@
     "source_file": "data\\corpus\\wiki\\the_purge_of_blackport.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Purge of Blackport",
     "wikilinks": [
       "Blackport",
@@ -1776,6 +1857,7 @@
     "source_file": "data\\corpus\\wiki\\the_sceptre_of_final_winter.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Sceptre of Final Winter",
     "wikilinks": [
       "The Sceptre of Final Winter",
@@ -1798,6 +1880,7 @@
     "source_file": "data\\corpus\\wiki\\the_silent_choir.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Silent Choir (faction)",
     "wikilinks": [
       "Vharencrag Fortress",
@@ -1824,6 +1907,7 @@
     "source_file": "data\\corpus\\wiki\\the_silent_psalter.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[The Silent Psalter]]",
     "wikilinks": [
       "The Silent Psalter",
@@ -1846,6 +1930,7 @@
     "source_file": "data\\corpus\\wiki\\the_thrice_bound_edge.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Thrice-Bound Edge",
     "wikilinks": [
       "The Thrice-Bound Edge",
@@ -1867,6 +1952,7 @@
     "source_file": "data\\corpus\\wiki\\the_thrice_bound_lantern.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Thrice-Bound Lantern",
     "wikilinks": [
       "The Thrice-Bound Lantern",
@@ -1887,6 +1973,7 @@
     "source_file": "data\\corpus\\wiki\\the_war_of_drowned_light.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[The War of Drowned Light]]",
     "wikilinks": [
       "The War of Drowned Light",
@@ -1912,6 +1999,7 @@
     "source_file": "data\\corpus\\wiki\\the_war_of_endless_vigil.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The War of Endless Vigil",
     "wikilinks": [
       "The War of Endless Vigil",
@@ -1937,6 +2025,7 @@
     "source_file": "data\\corpus\\wiki\\the_winter_reckoning.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "The Winter Reckoning",
     "wikilinks": [
       "The Winter Reckoning",
@@ -1967,6 +2056,7 @@
     "source_file": "data\\corpus\\wiki\\thorncairn.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Thorncairn",
     "wikilinks": [
       "Gloaming Reach",
@@ -1987,6 +2077,7 @@
     "source_file": "data\\corpus\\wiki\\thorn_wraith.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Thorn Wraith]] (creature)",
     "wikilinks": [
       "Thorn Wraith",
@@ -2007,6 +2098,7 @@
     "source_file": "data\\corpus\\wiki\\vault_chitin.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "[[Vault Chitin]] (creature)",
     "wikilinks": [
       "Vault Chitin",
@@ -2026,6 +2118,7 @@
     "source_file": "data\\corpus\\wiki\\vharencrag_fortress.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Vharencrag Fortress",
     "wikilinks": [
       "Vharencrag Fortress",
@@ -2050,6 +2143,7 @@
     "source_file": "data\\corpus\\wiki\\vharenford.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Vharenford",
     "wikilinks": [
       "Ash Wastes",
@@ -2071,6 +2165,7 @@
     "source_file": "data\\corpus\\wiki\\weeping_lurker.md",
     "source_type": "wiki",
     "page": null,
+    "has_ocr": false,
     "title": "Weeping Lurker (creature)",
     "wikilinks": [
       "Weeping Lurker",

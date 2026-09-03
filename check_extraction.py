@@ -61,6 +61,8 @@ def main():
 
     all_flagged = []
     for json_file in sorted(EXTRACTED_DIR.glob('*.json')):
+        if json_file.name.startswith('_') or json_file.name in {'chunks.json', 'chronicles_by_chapter.json'}:
+            continue
         flagged = check_file(json_file)
         all_flagged.extend(flagged)
 

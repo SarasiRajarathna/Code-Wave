@@ -30,14 +30,14 @@ def dedupe_by_basename(files: list[Path]) -> list[Path]:
     return list(by_stem.values())
 
 
-for folder in ['chronicles', 'wiki', 'codex', 'ephemera']:
+for folder in ['chronicles', 'wiki', 'codex', 'ephemera', 'images']:
     folder_path = corpus_root / folder
     if not folder_path.exists():
         print(f"Skipping {folder} -- folder not found at {folder_path}")
         continue
 
     folder_pages = []
-    candidate_files = [f for f in folder_path.glob('*') if f.suffix.lower() in ('.pdf', '.docx', '.md', '.txt')]
+    candidate_files = [f for f in folder_path.glob('*') if f.suffix.lower() in ('.pdf', '.docx', '.md', '.txt', '.png', '.jpg', '.jpeg')]
     files = dedupe_by_basename(candidate_files)
 
     for f in files:

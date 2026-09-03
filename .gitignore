@@ -1,2 +1,6 @@
+__pycache__/
+*.pyc
+.venv/
+.env
 data/corpus/
-
+data/vector_store/

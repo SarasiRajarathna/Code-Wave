@@ -3,246 +3,50 @@
     "text": "They knew the hand.\nIt was their own.",
     "source_file": "data\\corpus\\chronicles\\the_ashen_chronicles_volume_ii_the_long_reprisal.pdf",
     "source_type": "chronicles",
-    "page": 63
+    "page": 63,
+    "has_ocr": false
   },
   {
     "text": "Behind them, the cellar door slammed shut.",
     "source_file": "data\\corpus\\chronicles\\the_ashen_chronicles_volume_ii_the_long_reprisal.pdf",
     "source_type": "chronicles",
-    "page": 214
+    "page": 214,
+    "has_ocr": false
   },
   {
     "text": "Codex Vaeloria II: Armory of Relics\nand Bestiary",
     "source_file": "data\\corpus\\codex\\codex_vaeloria_ii_armory_of_relics_and_bestiary.pdf",
     "source_type": "codex",
-    "page": 1
+    "page": 1,
+    "has_ocr": false,
+    "has_plate": false,
+    "plate_needs_review": false
   },
   {
     "text": "authority is active but not uncontested.",
     "source_file": "data\\corpus\\codex\\codex_vaeloria_i_gazetteer_of_the_sundered_realms.pdf",
     "source_type": "codex",
-    "page": 45
+    "page": 45,
+    "has_ocr": false,
+    "has_plate": false,
+    "plate_needs_review": false
   },
   {
     "text": "The Annals of the Ashen Era",
     "source_file": "data\\corpus\\codex\\the_annals_of_the_ashen_era.pdf",
     "source_type": "codex",
-    "page": 1
+    "page": 1,
+    "has_ocr": true,
+    "has_plate": false,
+    "plate_needs_review": false
   },
   {
     "text": "right to regard itself as a principal power.",
     "source_file": "data\\corpus\\codex\\the_annals_of_the_ashen_era.pdf",
     "source_type": "codex",
-    "page": 3
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\ballad_concerning_crookgate_keep.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\ballad_concerning_crookgate_keep.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\ballad_concerning_the_sceptre_of_final_winter.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\contract_concerning_halvard_sablewood.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\contract_concerning_halvard_sablewood.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\contract_concerning_marsh_revenant.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\contract_concerning_marsh_revenant.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\contract_concerning_the_cinder_wrought_aegis.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\contract_concerning_the_cinder_wrought_aegis.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\field_report_concerning_cerys_sablewood_the_ashen.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\field_report_concerning_cerys_sablewood_the_ashen.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_ashreach.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_ashreach.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_crookgate_keep.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_crookgate_keep.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_crookgate_keep.scan.pdf",
-    "source_type": "ephemera",
-    "page": 3
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_greyfell_citadel.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_greyfell_citadel.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_greyfell_citadel.scan.pdf",
-    "source_type": "ephemera",
-    "page": 3
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_hesper_wrenfield.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_hesper_wrenfield.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\interrogation_record_concerning_hesper_wrenfield.scan.pdf",
-    "source_type": "ephemera",
-    "page": 3
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\letter_concerning_the_accord_of_mournthrone.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\letter_concerning_the_accord_of_mournthrone.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\muster_roll_concerning_hollowvale.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\petition_concerning_halvard_cindervale.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\petition_concerning_halvard_cindervale.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\petition_concerning_morwenna_morvain.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\petition_concerning_morwenna_morvain.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\sermon_concerning_fenthrone.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\sermon_concerning_fenthrone.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\sermon_concerning_marsh_revenant.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\sermon_concerning_marsh_revenant.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\sermon_concerning_salt_blind_leviathan.scan.pdf",
-    "source_type": "ephemera",
-    "page": 1
-  },
-  {
-    "text": "",
-    "source_file": "data\\corpus\\ephemera\\sermon_concerning_salt_blind_leviathan.scan.pdf",
-    "source_type": "ephemera",
-    "page": 2
+    "page": 3,
+    "has_ocr": false,
+    "has_plate": false,
+    "plate_needs_review": false
   }
 ]

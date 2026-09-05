@@ -1,14 +1,18 @@
 import sys
-sys.path.insert(0, 'src')
+from pathlib import Path
+
+src_dir = Path(__file__).parent
+if str(src_dir) not in sys.path:
+    sys.path.insert(0, str(src_dir))
 
 import json
-from pathlib import Path
 from ingest.loaders import load_file
 from ingest.processors.wiki import process_wiki_page
 from ingest.processors.codex import extract_plate_text, merge_plates_into_pages
 
-corpus_root = Path('data/corpus')          # your real corpus location
-output_dir = Path('data/extracted')        # one JSON file per folder goes here
+workspace_root = src_dir.parent
+corpus_root = workspace_root / 'data' / 'corpus'
+output_dir = workspace_root / 'data' / 'extracted'
 
 output_dir.mkdir(parents=True, exist_ok=True)
 

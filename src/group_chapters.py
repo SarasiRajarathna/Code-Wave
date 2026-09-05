@@ -1,25 +1,10 @@
-"""
-group_chapters.py
-
-Takes the flat list of pages in chronicles.json and groups them by
-chapter instead, so instead of "page 1, page 2, page 3..." you get
-"Chapter One: [pages 1-8 combined], Chapter Two: [pages 9-15 combined]".
-
-This makes the corpus much easier to browse AND gives you a better
-chunking unit later -- chunking by chapter (with the chunker splitting
-long chapters further) makes more semantic sense than chunking blindly
-by raw page boundaries, which can cut a scene in half arbitrarily.
-
-Detection: looks for lines that look like chapter headings -- e.g.
-"Chapter One", "CHAPTER 12", "Chapter Twelve: The Long Reprisal".
-If your novels use a different heading style, tell me a real example
-and I'll adjust the pattern.
-"""
-
 import json
 import re
 from pathlib import Path
 from collections import defaultdict
+
+src_dir = Path(__file__).parent
+workspace_root = src_dir.parent
 
 CHAPTER_PATTERN = re.compile(
     r"^\s*(Chapter\s+[\dIVXLCM]+|CHAPTER\s+[\dIVXLCM]+|Chapter\s+\w+)\b.*$",
@@ -28,10 +13,8 @@ CHAPTER_PATTERN = re.compile(
 
 
 def group_pages_by_chapter(pages: list[dict]) -> dict:
-    """pages: flat list of page dicts for ONE document (already sorted
-    by page number). Returns {chapter_heading: combined_text}."""
     chapters = defaultdict(list)
-    current_chapter = "(front matter)"  # anything before the first detected heading
+    current_chapter = "(front matter)"
 
     for page in pages:
         text = page["text"]
@@ -44,13 +27,16 @@ def group_pages_by_chapter(pages: list[dict]) -> dict:
 
 
 def main():
-    in_path = Path('data/extracted/chronicles.json')
-    out_path = Path('data/extracted/chronicles_by_chapter.json')
+    in_path = workspace_root / 'data' / 'extracted' / 'chronicles.json'
+    out_path = workspace_root / 'data' / 'extracted' / 'chronicles_by_chapter.json'
+
+    if not in_path.exists():
+        print(f"File not found: {in_path}")
+        return
 
     with open(in_path, encoding='utf-8') as f:
         pages = json.load(f)
 
-    # Group pages by their source document first
     by_doc = defaultdict(list)
     for p in pages:
         by_doc[p['source_file']].append(p)

@@ -1,34 +1,36 @@
-"""
-run_vector_ingest.py
-
-Main pipeline script for Member 1:
-1. Loads extracted archive files and chunks them.
-2. Generates embeddings for every chunk.
-3. Populates the ChromaDB vector database.
-"""
-
 import sys
-sys.path.insert(0, "src")
+from pathlib import Path
+
+src_dir = Path(__file__).parent
+if str(src_dir) not in sys.path:
+    sys.path.insert(0, str(src_dir))
+
+workspace_root = src_dir.parent
 
 import json
 import argparse
-from pathlib import Path
 from ingest.chunk import process_and_save_all_chunks
 from ingest.embeddings import get_embedding_model
 from db.vector_store import AshenVectorStore
 
 
 def main():
+    default_chunks = str(workspace_root / "data" / "extracted" / "chunks.json")
+    default_vector_store = str(workspace_root / "data" / "vector_store")
+
     parser = argparse.ArgumentParser(description="Ingest Ashen Era Archive into Vector Database")
     parser.add_argument("--provider", type=str, default="local", choices=["local", "voyage"], help="Embedding provider (local or voyage)")
     parser.add_argument("--model", type=str, default=None, help="Custom embedding model name")
-    parser.add_argument("--chunks-file", type=str, default="data/extracted/chunks.json", help="Path to chunks JSON")
+    parser.add_argument("--chunks-file", type=str, default=default_chunks, help="Path to chunks JSON")
+    parser.add_argument("--vector-store-dir", type=str, default=default_vector_store, help="Path to vector store directory")
     args = parser.parse_args()
 
     chunks_path = Path(args.chunks_file)
+    extracted_dir = str(workspace_root / "data" / "extracted")
+    
     if not chunks_path.exists():
         print(f"Chunks file {chunks_path} not found. Running chunker...")
-        chunks = process_and_save_all_chunks(output_file=str(chunks_path))
+        chunks = process_and_save_all_chunks(extracted_dir=extracted_dir, output_file=str(chunks_path))
     else:
         print(f"Loading existing chunks from {chunks_path}...")
         with open(chunks_path, encoding="utf-8") as f:
@@ -48,7 +50,7 @@ def main():
     print(f"Successfully generated {len(embeddings)} embeddings.")
 
     # Initialize Vector Store & Populate
-    vector_store = AshenVectorStore(persist_directory="data/vector_store")
+    vector_store = AshenVectorStore(persist_directory=args.vector_store_dir)
     vector_store.add_chunks(chunks, embeddings)
 
     # Summary by source_type

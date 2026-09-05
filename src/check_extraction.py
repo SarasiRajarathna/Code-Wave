@@ -1,27 +1,11 @@
-"""
-check_extraction.py
-
-Run this AFTER run_ingest.py. It scans every extracted JSON file and
-flags pages where very little (or no) text came out. A normal text
-page from a novel or codex entry has hundreds to thousands of
-characters. A page that returns near-zero characters almost always
-means one of:
-
-  - a scanned/handwritten page with no real text layer (needs OCR)
-  - a page that's mostly a table, diagram, or figure plate (needs
-    special handling, not just OCR)
-  - a genuinely blank or near-blank page (fine to ignore)
-  - something the loader silently mishandled (worth a manual look)
-
-This does NOT fix anything -- it just tells you exactly which files
-and page numbers need attention next, so you're not guessing.
-"""
-
 import json
 from pathlib import Path
 
-EXTRACTED_DIR = Path('data/extracted')
+src_dir = Path(__file__).parent
+workspace_root = src_dir.parent
+EXTRACTED_DIR = workspace_root / 'data' / 'extracted'
 MIN_CHARS = 50  # pages with fewer characters than this get flagged
+
 
 def check_file(path: Path):
     with open(path, encoding='utf-8') as f:
@@ -43,7 +27,7 @@ def check_file(path: Path):
     print(f"Average chars/page: {avg_chars:.0f}")
     print(f"Flagged (< {MIN_CHARS} chars): {len(flagged)}")
 
-    for p in flagged[:20]:  # show first 20 so it doesn't flood your terminal
+    for p in flagged[:20]:
         page_num = p.get('page')
         page_label = f"page {page_num}" if page_num is not None else "(whole doc)"
         print(f"  - {p['source_file']}  {page_label}  ->  {len(p.get('text',''))} chars")
@@ -69,7 +53,6 @@ def main():
     print(f"\n\nTOTAL flagged across all folders: {len(all_flagged)}")
     print("These are your OCR candidates -- likely scans or heavy-image pages.")
 
-    # Save the flagged list separately so you have a concrete to-do list
     out_path = EXTRACTED_DIR / '_needs_ocr.json'
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(all_flagged, f, ensure_ascii=False, indent=2)

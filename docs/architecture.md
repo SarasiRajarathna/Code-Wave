@@ -4,7 +4,7 @@
 **Competition:** SLIIT Codefest 2026 — AI Competition  
 **Challenge Sub-track:** Sub-track 1C — *Searching the Way a Human Does*  
 **Document Path:** `docs/architecture.md`  
-**Status:** Implemented Foundation (Ingestion, Processing, Vector Store) + Target 1C Agent Design  
+**Status:** 100% Implemented & Benchmark Validated (Sub-track 1C Agent, Hybrid Retrieval, OpenRouter LLM, Caching)  
 
 ---
 
@@ -388,12 +388,65 @@ data/
 │ Chapter-aware narrative chunking                 │ ✅ Implemented       │
 │ Dense vector embedding (Local + Voyage AI)       │ ✅ Implemented       │
 │ Persistent ChromaDB vector storage               │ ✅ Implemented       │
-│ Baseline vector similarity search                │ ✅ Implemented       │
-├──────────────────────────────────────────────────┼─────────────────────┤
-│ Iterative search state machine                   │ 📐 Designed (Sec. 4)│
-│ Autonomous query reformulation                   │ 📐 Designed (Sec. 4)│
-│ Multi-hop evidence accumulation & memory         │ 📐 Designed (Sec. 4)│
-│ Sufficiency evaluation & stopping criteria       │ 📐 Designed (Sec. 4)│
-│ LLM grounded answer synthesis                    │ 📐 Designed (Sec. 4)│
+│ Lexical BM25Okapi keyword index over 1,737 chunks│ ✅ Implemented       │
+│ Reciprocal Rank Fusion (RRF) Hybrid Retriever    │ ✅ Implemented       │
+│ Sub-track 1C Multi-Hop Reasoning Agent           │ ✅ Implemented       │
+│ Autonomous query reformulation via wikilinks     │ ✅ Implemented       │
+│ Sufficiency & Contradiction Evaluation Loop      │ ✅ Implemented       │
+│ Grounded LLM answer synthesis & citations        │ ✅ Implemented       │
+│ OpenRouter LLM gateway with 429 backoff retry    │ ✅ Implemented       │
+│ Frugal SHA256 disk caching subsystem             │ ✅ Implemented       │
+│ Interactive CLI & Benchmark runner               │ ✅ Implemented       │
+│ Automated backend unit test suite                │ ✅ Implemented       │
 └──────────────────────────────────────────────────┴─────────────────────┘
+```
+
+---
+
+## 9. Hybrid Retrieval & RRF Mathematical Specification
+
+To address the limitations of pure semantic dense retrieval (which often fails on specific entity names, dates like `391 AS`, or precise numbers), Code-Wave implements a dual-retriever architecture fused via **Reciprocal Rank Fusion (RRF)** (`src/retrieval/hybrid.py`):
+
+1. **Dense Vector Retriever**:
+   - Computes cosine similarity between query embeddings and chunk embeddings in ChromaDB:
+     $$\text{sim}_{\text{dense}}(q, d) = \frac{\mathbf{e}_q \cdot \mathbf{e}_d}{\|\mathbf{e}_q\| \|\mathbf{e}_d\|}$$
+2. **Sparse Lexical Retriever**:
+   - Computes probabilistic relevance using the BM25Okapi algorithm over tokenized chunks:
+     $$\text{score}_{\text{BM25}}(q, d) = \sum_{t \in q} \text{IDF}(t) \cdot \frac{f(t, d) \cdot (k_1 + 1)}{f(t, d) + k_1 \cdot \left(1 - b + b \cdot \frac{|d|}{\text{avgdl}}\right)}$$
+     where $k_1 = 1.5, b = 0.75$.
+3. **Reciprocal Rank Fusion**:
+   - The two ranked result lists are merged without requiring score normalization:
+     $$\text{RRF Score}(d) = \sum_{m \in \{\text{dense}, \text{bm25}\}} \frac{1}{k + \text{rank}_m(d)}$$
+     where $k = 60$ (standard Cormack et al. constant).
+
+---
+
+## 10. Rate-Limit Resilience & Token Frugality Architecture
+
+In compliance with competition guidelines (Section 9.3) and API budget constraints:
+1. **Exponential Backoff on HTTP 429**:
+   - `src/llm/client.py` catches upstream rate limits and transient connection errors, backing off exponentially ($2^0, 2^1, 2^2, 2^3\dots$ seconds) up to `max_retries = 3`.
+2. **Multi-Model Fallback Cascade**:
+   - If a model is deprecated, throttled, or unavailable on OpenRouter, the gateway seamlessly fails over to alternate verified free models:
+     `minimax/minimax-m3:free` $\longrightarrow$ `minimax/minimax-m2.7:free` $\longrightarrow$ `liquid/lfm-2.5-2.6b:free` $\longrightarrow$ `nvidia/nemotron-3.5-lightning:free`.
+3. **Deterministic SHA256 Disk Caching**:
+   - `src/utils/cache.py` computes SHA-256 hashes of `(operation, model, temperature, prompt)` and caches completed generations under `data/.cache/`.
+   - Repeated queries in benchmark testing execute with zero latency and zero API cost.
+4. **Offline Heuristic Synthesizer**:
+   - If no API key is provided, the client falls back to grounded context extraction, ensuring 100% testability in air-gapped or keyless environments.
+
+---
+
+## 11. Backend Verification & Automated Testing Suite
+
+The backend architecture is verified using an automated test suite ([`src/test_backend.py`](file:///c:/Users/sahil%20kavishka/Downloads/Code-Wave/Code-Wave/src/test_backend.py)):
+- **Test 1**: ChromaDB Vector Store & Embedding model initialization and similarity query.
+- **Test 2**: BM25Okapi index build over all 1,737 chunks and keyword matching.
+- **Test 3**: Hybrid RRF fusion scoring and rank stability.
+- **Test 4**: OpenRouter LLM gateway connectivity, offline fallback, and disk caching.
+- **Test 5**: End-to-end Sub-track 1C iterative agent reasoning loop.
+
+Execution command:
+```bash
+python src/test_backend.py
 ```

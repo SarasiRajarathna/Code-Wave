@@ -187,7 +187,9 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             is_sufficient=is_sufficient
         )
 
-        self.cache.set(cache_key, result.to_dict())
+        # Only cache definitive answers, do not cache transient offline fallback notes
+        if "(Note: Add your free OPENROUTER_API_KEY" not in answer:
+            self.cache.set(cache_key, result.to_dict())
         return result
 
     def _format_context(self, chunks: List[Dict[str, Any]]) -> str:

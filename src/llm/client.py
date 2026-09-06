@@ -11,6 +11,7 @@ Implements:
 """
 
 import os
+import re
 import time
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
@@ -154,7 +155,13 @@ class OpenRouterLLM:
             context_block = prompt
 
         lines = [line.strip() for line in context_block.splitlines() if line.strip()]
-        informative = [l for l in lines if not l.startswith("Passage") and not l.startswith("[") and len(l) > 20]
+        informative = []
+        for l in lines:
+            if l.startswith("Passage"):
+                continue
+            cleaned = re.sub(r"^\[.*?\]\s*", "", l).strip()
+            if len(cleaned) > 15:
+                informative.append(cleaned)
 
         if not informative:
             return "Based on the retrieved archive passages, no definitive answer could be synthesized without an active LLM key."

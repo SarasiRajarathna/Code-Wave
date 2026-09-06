@@ -29,9 +29,9 @@ from ingest.embeddings import get_embedding_model
 
 
 if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace", line_buffering=True)
 if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace", line_buffering=True)
 
 
 def print_banner():
@@ -42,22 +42,22 @@ def print_banner():
 
 
 def format_agent_output(result):
-    print("\n" + "-" * 75)
+    print("\n" + "=" * 75)
     print(f"QUESTION: {result.question}")
-    print("-" * 75)
+    print("=" * 75)
 
     if result.hops:
-        print("\n[REASONING & RETRIEVAL TRAIL]")
+        print("\n[SUB-TRACK 1C: ITERATIVE REASONING & RETRIEVAL TRAIL]")
         for h in result.hops:
             print(f"  [Hop {h.hop_number}] Searched: \"{h.query}\"")
             if h.thought:
                 print(f"            Thought : {h.thought}")
 
-    print("\n[ANSWER]")
+    print("\n[GROUNDED SYNTHESIS]")
     print(result.answer)
 
     if result.citations:
-        print("\n[CITATIONS]")
+        print("\n[VERIFIED ARCHIVE CITATIONS]")
         for c in result.citations:
             print(f"  * {c}")
 
@@ -66,7 +66,7 @@ def format_agent_output(result):
         print(f"  Plate Title: {result.rich_media['title']}")
         print(f"  Local Path : {result.rich_media['path']}")
 
-    print("-" * 75 + "\n")
+    print("\n" + "=" * 75 + "\n")
 
 
 def run_interactive(agent: AshenIterativeAgent):

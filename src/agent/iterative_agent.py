@@ -138,7 +138,11 @@ class AshenIterativeAgent:
             hops.append(hop_record)
 
             if verbose:
-                print(f"  -> Thought: {evaluation['thought']}")
+                print(f"  -> Thought    : {evaluation['thought']}")
+                if not evaluation["sufficient"] and hop_idx < self.max_hops:
+                    print(f"  -> Gap/Action : Evidence insufficient. Reformulating to: \"{evaluation['next_query']}\"")
+                elif evaluation["sufficient"]:
+                    print(f"  -> Evaluation : Sufficient evidence discovered. Proceeding to synthesis.")
 
             if evaluation["sufficient"] or hop_idx == self.max_hops:
                 is_sufficient = evaluation["sufficient"]

@@ -49,9 +49,11 @@ class AshenBM25Retriever:
         self,
         query: str,
         n_results: int = 10,
+        top_k: Optional[int] = None,
         source_type_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Search chunks using BM25 scoring."""
+        limit = top_k if top_k is not None else n_results
         query_tokens = tokenize(query)
         if not query_tokens or not self.chunks:
             return []
@@ -97,7 +99,7 @@ class AshenBM25Retriever:
                 "bm25_score": float(score),
             })
 
-            if len(results) >= n_results:
+            if len(results) >= limit:
                 break
 
         return results

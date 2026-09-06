@@ -83,6 +83,7 @@ class HybridRetriever:
         for cid in sorted_ids[:top_k]:
             entry = doc_map[cid].copy()
             entry["hybrid_score"] = round(rrf_scores[cid], 6)
+            entry["rrf_score"] = round(rrf_scores[cid], 6)
             final_results.append(entry)
 
         return final_results

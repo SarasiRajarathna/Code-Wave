@@ -22,6 +22,7 @@ from retrieval.knowledge_graph import AshenKnowledgeGraph
 from retrieval.chronology import LoreChronologyEngine
 from retrieval.decomposer import QueryDecomposer
 from agent.proof_of_absence import ProofOfAbsenceEngine
+from agent.critic import ArchivistCritic
 from llm.client import OpenRouterLLM, GROUNDING_SYSTEM_PROMPT
 from agent.rich_media import RichMediaResolver
 from utils.cache import SimpleDiskCache
@@ -53,6 +54,9 @@ class AgentResult:
     timeline_events: List[Dict[str, Any]] = field(default_factory=list)
     decomposed_queries: List[str] = field(default_factory=list)
     proof_of_absence: Optional[Dict[str, Any]] = None
+    critic_evaluation: Optional[Dict[str, Any]] = None
+    source_perspective: Optional[Dict[str, Any]] = None
+    investigation_leads: List[Dict[str, str]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -81,6 +85,9 @@ class AgentResult:
             "timeline_events": self.timeline_events,
             "decomposed_queries": self.decomposed_queries,
             "proof_of_absence": self.proof_of_absence,
+            "critic_evaluation": self.critic_evaluation,
+            "source_perspective": self.source_perspective,
+            "investigation_leads": self.investigation_leads,
         }
 
 
@@ -103,6 +110,7 @@ class AshenIterativeAgent:
         self.chronology = LoreChronologyEngine()
         self.decomposer = QueryDecomposer(llm=self.llm)
         self.proof_engine = ProofOfAbsenceEngine()
+        self.critic = ArchivistCritic(llm=self.llm, kg=self.kg)
 
     def run(self, question: str, verbose: bool = True, no_cache: bool = False) -> AgentResult:
         """Execute human-like iterative search workflow for the user query."""
@@ -117,6 +125,19 @@ class AshenIterativeAgent:
                     print("[Agent] Returning cached response.")
                 hops = [SearchHop(h["hop"], h["query"], [], h["thought"]) for h in cached_data.get("hops", [])]
                 reasoning_graph = cached_data.get("reasoning_graph") or self._build_reasoning_graph(question, hops, cached_data["answer"])
+
+                critic_eval = cached_data.get("critic_evaluation")
+                if not critic_eval:
+                    critic_eval = self.critic.reflect_and_evaluate(question, cached_data["answer"], [], cached_data.get("grounding_status", "VERIFIED_GROUNDED"))
+
+                source_persp = cached_data.get("source_perspective")
+                if not source_persp:
+                    source_persp = self.critic.determine_source_perspective([{"metadata": {"source_file": c}} for c in cached_data.get("citations", [])])
+
+                leads = cached_data.get("investigation_leads")
+                if not leads:
+                    leads = self.critic.generate_investigation_leads(question, cached_data["answer"], [])
+
                 return AgentResult(
                     question=question,
                     answer=cached_data["answer"],
@@ -133,7 +154,10 @@ class AshenIterativeAgent:
                     kg_triplets=cached_data.get("kg_triplets", []),
                     timeline_events=cached_data.get("timeline_events", []),
                     decomposed_queries=cached_data.get("decomposed_queries", []),
-                    proof_of_absence=cached_data.get("proof_of_absence")
+                    proof_of_absence=cached_data.get("proof_of_absence"),
+                    critic_evaluation=critic_eval,
+                    source_perspective=source_persp,
+                    investigation_leads=leads
                 )
 
         seen_chunk_ids: Set[str] = set()
@@ -246,6 +270,11 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
         # 11. Negative evidence & proof of absence evaluation
         proof_of_absence = self.proof_engine.evaluate(question, accumulated_chunks, answer, verification["status"])
 
+        # 12. Archivist Critic: Self-Reflection, Source Perspective & Curiosity Leads
+        critic_evaluation = self.critic.reflect_and_evaluate(question, answer, accumulated_chunks, verification["status"])
+        source_perspective = self.critic.determine_source_perspective(accumulated_chunks)
+        investigation_leads = self.critic.generate_investigation_leads(question, answer, accumulated_chunks)
+
         result = AgentResult(
             question=question,
             answer=answer,
@@ -262,7 +291,10 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             kg_triplets=kg_triplets,
             timeline_events=timeline_events,
             decomposed_queries=decomposed,
-            proof_of_absence=proof_of_absence
+            proof_of_absence=proof_of_absence,
+            critic_evaluation=critic_evaluation,
+            source_perspective=source_perspective,
+            investigation_leads=investigation_leads
         )
 
         # Only cache definitive answers, do not cache transient offline fallback notes
@@ -403,6 +435,24 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
                 "data": proof_of_absence
             }
 
+        critic_evaluation = self.critic.reflect_and_evaluate(question, answer, accumulated_chunks, verification["status"])
+        yield {
+            "event": "critic_reflection",
+            "data": critic_evaluation
+        }
+
+        source_perspective = self.critic.determine_source_perspective(accumulated_chunks)
+        yield {
+            "event": "source_perspective",
+            "data": source_perspective
+        }
+
+        investigation_leads = self.critic.generate_investigation_leads(question, answer, accumulated_chunks)
+        yield {
+            "event": "investigation_leads",
+            "data": {"leads": investigation_leads}
+        }
+
         result = AgentResult(
             question=question,
             answer=answer,
@@ -419,7 +469,10 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             kg_triplets=kg_triplets,
             timeline_events=timeline_events,
             decomposed_queries=decomposed,
-            proof_of_absence=proof_of_absence
+            proof_of_absence=proof_of_absence,
+            critic_evaluation=critic_evaluation,
+            source_perspective=source_perspective,
+            investigation_leads=investigation_leads
         )
 
         yield {

@@ -44,6 +44,7 @@ class AgentResult:
     verified_facts_count: int = 0
     reasoning_graph: Optional[str] = None
     pinpointed_citations: List[Dict[str, str]] = field(default_factory=list)
+    contradictions: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -67,6 +68,7 @@ class AgentResult:
             "verified_facts_count": self.verified_facts_count,
             "reasoning_graph": self.reasoning_graph,
             "pinpointed_citations": self.pinpointed_citations,
+            "contradictions": self.contradictions,
         }
 
 
@@ -110,7 +112,8 @@ class AshenIterativeAgent:
                     grounding_status=cached_data.get("grounding_status", "VERIFIED_GROUNDED"),
                     verified_facts_count=cached_data.get("verified_facts_count", 0),
                     reasoning_graph=reasoning_graph,
-                    pinpointed_citations=cached_data.get("pinpointed_citations", [])
+                    pinpointed_citations=cached_data.get("pinpointed_citations", []),
+                    contradictions=cached_data.get("contradictions", [])
                 )
 
         seen_chunk_ids: Set[str] = set()
@@ -195,7 +198,10 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
         if rich_item:
             answer = answer + rich_item["markdown"]
 
-        # 8. Self-reflective grounding verification & reasoning graph
+        # 8. Contradiction & conflict resolution detection
+        contradictions = self._detect_contradictions(question, accumulated_chunks)
+
+        # 9. Self-reflective grounding verification & reasoning graph
         verification = self._verify_grounding(answer, accumulated_chunks)
         reasoning_graph = self._build_reasoning_graph(question, hops, answer)
 
@@ -210,7 +216,8 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             grounding_status=verification["status"],
             verified_facts_count=verification["grounded_numbers"],
             reasoning_graph=reasoning_graph,
-            pinpointed_citations=pinpointed_citations
+            pinpointed_citations=pinpointed_citations,
+            contradictions=contradictions
         )
 
         # Only cache definitive answers, do not cache transient offline fallback notes
@@ -482,3 +489,52 @@ Return ONLY the JSON object.
                 "thought": "Proceeding with current evidence.",
                 "next_query": question
             }
+
+    def _detect_contradictions(self, question: str, chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Sub-track 1C: Contradiction & Conflict Reasoning.
+        Detects conflicting historical claims, disputed dates, or unrecorded facts
+        between authoritative registers (Codex Vaeloria I/II - Tier 1) and secondary archives (Wiki/Ephemera).
+        """
+        contradictions = []
+        tier1_chunks = []
+        secondary_chunks = []
+
+        for c in chunks:
+            src = c.get("metadata", {}).get("source_file", "").lower()
+            if "codex_vaeloria" in src:
+                tier1_chunks.append(c)
+            else:
+                secondary_chunks.append(c)
+
+        dispute_keywords = ["contested", "withheld", "disputed", "uncertain", "unconfirmed", "conflicting"]
+        for sc in secondary_chunks:
+            text = sc.get("text", "")
+            text_lower = text.lower()
+            meta = sc.get("metadata", {})
+            src_name = meta.get("source_file", "Archive Record")
+
+            for kw in dispute_keywords:
+                if kw in text_lower:
+                    if tier1_chunks:
+                        t1_src = tier1_chunks[0].get("metadata", {}).get("source_file", "Codex Vaeloria")
+                        t1_page = tier1_chunks[0].get("metadata", {}).get("page", "")
+                        contradictions.append({
+                            "topic": question.rstrip("?").strip(),
+                            "tier1_authority": f"{t1_src} (Page {t1_page})" if t1_page else t1_src,
+                            "secondary_source": src_name,
+                            "nature_of_conflict": f"Secondary record explicitly notes that the claim/date is '{kw}', whereas the authoritative register preserves the recorded entry.",
+                            "archival_resolution": "Tier 1 Official Register prioritized over secondary/popular accounts per Ashen Archive Curatorial Standard."
+                        })
+                        return contradictions
+                    else:
+                        contradictions.append({
+                            "topic": question.rstrip("?").strip(),
+                            "tier1_authority": "Archive Records (Contested)",
+                            "secondary_source": src_name,
+                            "nature_of_conflict": f"The archive explicitly records this historical datum as '{kw}'.",
+                            "archival_resolution": "Contested historical status faithfully preserved; speculative resolution refused."
+                        })
+                        return contradictions
+        return contradictions
+

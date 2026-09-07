@@ -11,10 +11,11 @@ from typing import List, Dict, Any, Optional
 from db.vector_store import AshenVectorStore
 from ingest.embeddings import BaseEmbeddingModel, get_embedding_model
 from retrieval.bm25_search import AshenBM25Retriever
+from retrieval.reranker import SemanticReranker
 
 
 class HybridRetriever:
-    """Combines vector similarity search with BM25 keyword matching via RRF."""
+    """Combines vector similarity search with BM25 keyword matching via RRF and Semantic Reranking."""
 
     def __init__(
         self,
@@ -27,6 +28,7 @@ class HybridRetriever:
         self.bm25 = bm25_retriever or AshenBM25Retriever()
         self.embedding_model = embedding_model or get_embedding_model(provider="local")
         self.rrf_k = rrf_k
+        self.reranker = SemanticReranker(embedding_model=self.embedding_model)
 
     def search(
         self,
@@ -35,6 +37,7 @@ class HybridRetriever:
         dense_weight: float = 0.5,
         bm25_weight: float = 0.5,
         source_type_filter: Optional[str] = None,
+        rerank: bool = True,
     ) -> List[Dict[str, Any]]:
         """Execute hybrid search using Reciprocal Rank Fusion."""
         # 1. Fetch dense vector results
@@ -79,11 +82,16 @@ class HybridRetriever:
         # Sort merged documents by combined RRF score
         sorted_ids = sorted(rrf_scores.keys(), key=lambda x: rrf_scores[x], reverse=True)
 
-        final_results = []
-        for cid in sorted_ids[:top_k]:
+        pool_size = max(top_k * 2, 10)
+        rrf_candidates = []
+        for cid in sorted_ids[:pool_size]:
             entry = doc_map[cid].copy()
             entry["hybrid_score"] = round(rrf_scores[cid], 6)
             entry["rrf_score"] = round(rrf_scores[cid], 6)
-            final_results.append(entry)
+            rrf_candidates.append(entry)
 
-        return final_results
+        # 4. Contextual Semantic Reranking
+        if rerank and self.reranker:
+            return self.reranker.rerank(query, rrf_candidates, top_k=top_k)
+
+        return rrf_candidates[:top_k]

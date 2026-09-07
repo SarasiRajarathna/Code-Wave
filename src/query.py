@@ -96,6 +96,17 @@ def format_agent_output(result):
         print(f"  Plate Title: {result.rich_media['title']}")
         print(f"  Local Path : {result.rich_media['path']}")
 
+    # Contradiction / Conflict Resolution
+    contradictions = getattr(result, "contradictions", [])
+    if contradictions:
+        print("\n[CONTRADICTION & CONFLICT RESOLUTION]")
+        for con in contradictions:
+            print(f"  * Conflict Topic     : {con['topic']}")
+            print(f"  * Archival Authority : {con.get('tier1_authority', 'N/A')}")
+            print(f"  * Secondary Source   : {con.get('secondary_source', 'N/A')}")
+            print(f"  * Nature of Conflict : {con.get('nature_of_conflict', 'N/A')}")
+            print(f"  * Curatorial Verdict : {con.get('archival_resolution', 'N/A')}")
+
     print("\n" + "=" * 75 + "\n")
 
 

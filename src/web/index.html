@@ -200,8 +200,12 @@
     .modal-close:hover{color:var(--red);border-color:var(--red)}
     .toast{position:fixed;bottom:28px;right:28px;background:rgba(10,16,28,.97);border:1px solid var(--gold);border-radius:9px;padding:11px 20px;color:var(--gold-light);font-size:13px;box-shadow:0 6px 28px rgba(0,0,0,.6);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:1001;display:flex;align-items:center;gap:8px}
     .toast.show{transform:translateY(0);opacity:1}
-    .spinner{width:16px;height:16px;border:2.5px solid rgba(5,7,10,.35);border-top-color:#05070a;border-radius:50%;animation:spin .75s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    .era-item{background:rgba(8,12,22,.65);border:1px solid rgba(230,167,60,.16);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+    .era-item-header{display:flex;justify-content:space-between;align-items:center}
+    .era-year-badge{background:rgba(230,167,60,.18);color:var(--gold-light);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px}
+    .era-auth-badge{font-size:10px;color:var(--cyan);font-family:'JetBrains Mono',monospace}
+    .era-event-text{font-size:12.5px;color:#cbd5e1;line-height:1.5}
+    .era-src-text{font-size:10.5px;color:var(--text-faint);font-style:italic}
     @media print{.sidebar,header,.search-panel,.workspace-nav,#tab-canvas,#tab-traversal,#tab-evidence,.action-toolbar,#star-canvas,.toast,.modal-overlay{display:none!important}body{background:#fff;color:#000}.card{box-shadow:none;border:1px solid #ccc}.answer-text{color:#111}}
     @media(max-width:1100px){.synthesis-grid{grid-template-columns:1fr}.canvas-layout{grid-template-columns:1fr}.kg-info-panel{display:none}}
     @media(max-width:860px){.sidebar{position:fixed;left:0;top:0;height:100vh;z-index:200}.sidebar.collapsed{transform:translateX(-100%);width:var(--sidebar-w);min-width:var(--sidebar-w)}.viewport{padding:0 16px 40px}header{padding:0 16px;margin:0 -16px}.brand-text p{display:none}.header-telemetry .badge-pill:nth-child(n+3){display:none}.nav-tab{font-size:11.5px;padding:8px 8px}}
@@ -299,6 +303,11 @@
               <hr class="card-divider" style="margin-bottom:12px;">
               <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;">KG &mdash; Matched Triples</div>
               <div class="triplets-grid" id="triplets-grid"></div>
+            </div>
+            <div id="timeline-events-section" style="display:none;">
+              <hr class="card-divider" style="margin-bottom:12px;margin-top:16px;">
+              <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;">&#9203; Temporal Lore Chronology</div>
+              <div class="era-timeline-list" id="era-timeline-list" style="display:flex;flex-direction:column;gap:8px;"></div>
             </div>
           </article>
           <div class="synthesis-right">
@@ -460,6 +469,7 @@ async function executeResearch(){
   btnResearch.disabled=true;btnSpinner.style.display='inline-block';btnLabel.textContent='RESEARCHING...';
   document.getElementById('conflict-box').classList.remove('show');
   figureCard.style.display='none';tripletsSection.style.display='none';
+  if(document.getElementById('timeline-events-section')) document.getElementById('timeline-events-section').style.display='none';
   answerBox.className='';answerBox.innerHTML='';
   timelineList.innerHTML='';
   startLoading();
@@ -592,6 +602,25 @@ function renderWorkspace(data){
   document.getElementById('m-triples').textContent=(data.kg_triplets||[]).length+' Triples';
   const triplets=data.kg_triplets||[];
   if(triplets.length>0){tripletsSection.style.display='block';tripletsGrid.innerHTML=triplets.slice(0,18).map(t=>'<div class="triplet-chip"><span class="tc-sub">'+esc(t.subject)+'</span><span class="tc-rel">'+esc(t.predicate)+'</span><span class="tc-obj">'+esc(t.object)+'</span></div>').join('');}else{tripletsSection.style.display='none';}
+
+  const timelineEvents=data.timeline_events||[];
+  const eraSec=document.getElementById('timeline-events-section');
+  const eraList=document.getElementById('era-timeline-list');
+  if(eraSec&&eraList){
+    if(timelineEvents.length>0){
+      eraSec.style.display='block';
+      eraList.innerHTML=timelineEvents.map(e=>
+        '<div class="era-item">' +
+        '<div class="era-item-header"><span class="era-year-badge">'+esc(e.year)+' &middot; '+esc(e.era)+'</span><span class="era-auth-badge">'+esc(e.authority)+'</span></div>' +
+        '<div class="era-event-text">'+esc(e.event)+'</div>' +
+        '<div class="era-src-text">&mdash; '+esc(e.source)+'</div>' +
+        '</div>'
+      ).join('');
+    }else{
+      eraSec.style.display='none';
+    }
+  }
+
   const cntT=document.getElementById('cnt-traversal');cntT.textContent=data.hops.length;cntT.classList.toggle('show',data.hops.length>0);
   document.getElementById('traversal-pill').textContent=data.hops.length+' Hop'+(data.hops.length!==1?'s':'');
   timelineList.innerHTML='';

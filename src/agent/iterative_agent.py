@@ -19,6 +19,7 @@ from typing import List, Dict, Any, Optional, Set
 
 from retrieval.hybrid import HybridRetriever
 from retrieval.knowledge_graph import AshenKnowledgeGraph
+from retrieval.chronology import LoreChronologyEngine
 from llm.client import OpenRouterLLM, GROUNDING_SYSTEM_PROMPT
 from agent.rich_media import RichMediaResolver
 from utils.cache import SimpleDiskCache
@@ -47,6 +48,7 @@ class AgentResult:
     pinpointed_citations: List[Dict[str, str]] = field(default_factory=list)
     contradictions: List[Dict[str, Any]] = field(default_factory=list)
     kg_triplets: List[Dict[str, Any]] = field(default_factory=list)
+    timeline_events: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -72,6 +74,7 @@ class AgentResult:
             "pinpointed_citations": self.pinpointed_citations,
             "contradictions": self.contradictions,
             "kg_triplets": self.kg_triplets,
+            "timeline_events": self.timeline_events,
         }
 
 
@@ -91,6 +94,7 @@ class AshenIterativeAgent:
         self.max_hops = max_hops
         self.cache = SimpleDiskCache()
         self.kg = AshenKnowledgeGraph()
+        self.chronology = LoreChronologyEngine()
 
     def run(self, question: str, verbose: bool = True, no_cache: bool = False) -> AgentResult:
         """Execute human-like iterative search workflow for the user query."""
@@ -118,7 +122,8 @@ class AshenIterativeAgent:
                     reasoning_graph=reasoning_graph,
                     pinpointed_citations=cached_data.get("pinpointed_citations", []),
                     contradictions=cached_data.get("contradictions", []),
-                    kg_triplets=cached_data.get("kg_triplets", [])
+                    kg_triplets=cached_data.get("kg_triplets", []),
+                    timeline_events=cached_data.get("timeline_events", [])
                 )
 
         seen_chunk_ids: Set[str] = set()
@@ -214,7 +219,10 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
         # 8. Contradiction & conflict resolution detection
         contradictions = self._detect_contradictions(question, accumulated_chunks)
 
-        # 9. Self-reflective grounding verification & reasoning graph
+        # 9. Temporal reasoning & lore chronology extraction
+        timeline_events = self.chronology.extract_timeline(accumulated_chunks)
+
+        # 10. Self-reflective grounding verification & reasoning graph
         verification = self._verify_grounding(answer, accumulated_chunks)
         reasoning_graph = self._build_reasoning_graph(question, hops, answer)
 
@@ -231,7 +239,8 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             reasoning_graph=reasoning_graph,
             pinpointed_citations=pinpointed_citations,
             contradictions=contradictions,
-            kg_triplets=kg_triplets
+            kg_triplets=kg_triplets,
+            timeline_events=timeline_events
         )
 
         # Only cache definitive answers, do not cache transient offline fallback notes
@@ -348,6 +357,13 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             answer = answer + rich_item["markdown"]
 
         contradictions = self._detect_contradictions(question, accumulated_chunks)
+        timeline_events = self.chronology.extract_timeline(accumulated_chunks)
+        if timeline_events:
+            yield {
+                "event": "timeline_events",
+                "data": {"events": timeline_events}
+            }
+
         verification = self._verify_grounding(answer, accumulated_chunks)
         reasoning_graph = self._build_reasoning_graph(question, hops, answer)
 
@@ -364,7 +380,8 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             reasoning_graph=reasoning_graph,
             pinpointed_citations=pinpointed_citations,
             contradictions=contradictions,
-            kg_triplets=kg_triplets
+            kg_triplets=kg_triplets,
+            timeline_events=timeline_events
         )
 
         yield {

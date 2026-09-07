@@ -21,6 +21,7 @@ from retrieval.hybrid import HybridRetriever
 from retrieval.knowledge_graph import AshenKnowledgeGraph
 from retrieval.chronology import LoreChronologyEngine
 from retrieval.decomposer import QueryDecomposer
+from agent.proof_of_absence import ProofOfAbsenceEngine
 from llm.client import OpenRouterLLM, GROUNDING_SYSTEM_PROMPT
 from agent.rich_media import RichMediaResolver
 from utils.cache import SimpleDiskCache
@@ -51,6 +52,7 @@ class AgentResult:
     kg_triplets: List[Dict[str, Any]] = field(default_factory=list)
     timeline_events: List[Dict[str, Any]] = field(default_factory=list)
     decomposed_queries: List[str] = field(default_factory=list)
+    proof_of_absence: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -78,6 +80,7 @@ class AgentResult:
             "kg_triplets": self.kg_triplets,
             "timeline_events": self.timeline_events,
             "decomposed_queries": self.decomposed_queries,
+            "proof_of_absence": self.proof_of_absence,
         }
 
 
@@ -99,6 +102,7 @@ class AshenIterativeAgent:
         self.kg = AshenKnowledgeGraph()
         self.chronology = LoreChronologyEngine()
         self.decomposer = QueryDecomposer(llm=self.llm)
+        self.proof_engine = ProofOfAbsenceEngine()
 
     def run(self, question: str, verbose: bool = True, no_cache: bool = False) -> AgentResult:
         """Execute human-like iterative search workflow for the user query."""
@@ -128,7 +132,8 @@ class AshenIterativeAgent:
                     contradictions=cached_data.get("contradictions", []),
                     kg_triplets=cached_data.get("kg_triplets", []),
                     timeline_events=cached_data.get("timeline_events", []),
-                    decomposed_queries=cached_data.get("decomposed_queries", [])
+                    decomposed_queries=cached_data.get("decomposed_queries", []),
+                    proof_of_absence=cached_data.get("proof_of_absence")
                 )
 
         seen_chunk_ids: Set[str] = set()
@@ -238,6 +243,9 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
         verification = self._verify_grounding(answer, accumulated_chunks)
         reasoning_graph = self._build_reasoning_graph(question, hops, answer)
 
+        # 11. Negative evidence & proof of absence evaluation
+        proof_of_absence = self.proof_engine.evaluate(question, accumulated_chunks, answer, verification["status"])
+
         result = AgentResult(
             question=question,
             answer=answer,
@@ -253,7 +261,8 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             contradictions=contradictions,
             kg_triplets=kg_triplets,
             timeline_events=timeline_events,
-            decomposed_queries=decomposed
+            decomposed_queries=decomposed,
+            proof_of_absence=proof_of_absence
         )
 
         # Only cache definitive answers, do not cache transient offline fallback notes
@@ -387,6 +396,12 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
 
         verification = self._verify_grounding(answer, accumulated_chunks)
         reasoning_graph = self._build_reasoning_graph(question, hops, answer)
+        proof_of_absence = self.proof_engine.evaluate(question, accumulated_chunks, answer, verification["status"])
+        if proof_of_absence:
+            yield {
+                "event": "proof_of_absence",
+                "data": proof_of_absence
+            }
 
         result = AgentResult(
             question=question,
@@ -403,7 +418,8 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             contradictions=contradictions,
             kg_triplets=kg_triplets,
             timeline_events=timeline_events,
-            decomposed_queries=decomposed
+            decomposed_queries=decomposed,
+            proof_of_absence=proof_of_absence
         )
 
         yield {

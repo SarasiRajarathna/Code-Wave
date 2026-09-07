@@ -298,6 +298,12 @@
               <div class="conflict-title">&#9888;&#65039; Archival Contradiction Detected &amp; Resolved</div>
               <div id="conflict-body" class="conflict-body"></div>
             </div>
+            <div id="proof-absence-box" style="display:none;margin-bottom:14px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.35);border-radius:12px;padding:14px 16px;flex-direction:column;gap:8px;">
+              <div style="font-weight:800;color:#6ee7b7;font-size:13px;display:flex;align-items:center;gap:8px;">
+                <span>&#128737;&#65039;</span> <span>Archival Certificate of Absence &amp; Zero-Hallucination Proof</span>
+              </div>
+              <div id="proof-absence-body" style="font-size:12.5px;color:#cbd5e1;line-height:1.6;"></div>
+            </div>
             <div id="answer-box"><div class="answer-placeholder"><span class="ph-icon">&#128220;</span>Select a <strong>Benchmark Case</strong> or type a question and press <strong>RESEARCH</strong>.</div></div>
             <div id="triplets-section" style="display:none;">
               <hr class="card-divider" style="margin-bottom:12px;">
@@ -472,6 +478,7 @@ async function executeResearch(){
   const query=queryInput.value.trim();if(!query)return;
   btnResearch.disabled=true;btnSpinner.style.display='inline-block';btnLabel.textContent='RESEARCHING...';
   document.getElementById('conflict-box').classList.remove('show');
+  if(document.getElementById('proof-absence-box')) document.getElementById('proof-absence-box').style.display='none';
   figureCard.style.display='none';tripletsSection.style.display='none';
   if(document.getElementById('timeline-events-section')) document.getElementById('timeline-events-section').style.display='none';
   if(document.getElementById('decomposed-pills')) document.getElementById('decomposed-pills').style.display='none';
@@ -609,6 +616,31 @@ function renderWorkspace(data){
     document.getElementById('conflict-body').innerHTML='<strong>Topic:</strong> '+esc(c.topic||'--')+'<br><strong>Authoritative:</strong> '+esc(c.tier1_authority||'Codex Vaeloria')+'<br><strong>Resolution:</strong> '+esc(c.archival_resolution||'--');
     cb.classList.add('show');
   }else{cb.classList.remove('show');}
+
+  const poa=data.proof_of_absence;
+  const poaBox=document.getElementById('proof-absence-box');
+  const poaBody=document.getElementById('proof-absence-body');
+  if(poaBox&&poaBody){
+    if(poa&&poa.certified){
+      poaBox.style.display='flex';
+      const auditHtml=(poa.corpora_audited||[]).map(c=>
+        '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11.5px;">' +
+        '<span style="color:var(--gold-light);font-weight:600;">'+esc(c.corpus)+':</span>' +
+        '<span style="color:var(--emerald);font-family:\'JetBrains Mono\',monospace;">'+esc(c.status)+'</span>' +
+        '</div>'
+      ).join('');
+      poaBody.innerHTML=
+        '<p style="margin-bottom:8px;">'+esc(poa.attestation)+'</p>' +
+        '<div style="background:rgba(6,10,18,.8);border-radius:6px;padding:8px 12px;margin-top:6px;border:1px solid rgba(52,211,153,.2);">' +
+        auditHtml +
+        '</div>' +
+        '<div style="margin-top:6px;font-size:11px;color:var(--text-faint);">' +
+        'Guarantee: <strong style="color:var(--emerald);">'+esc(poa.hallucination_prevention_guarantee)+' Zero-Hallucination</strong> across '+poa.total_chunks_indexed+' chunks.' +
+        '</div>';
+    }else{
+      poaBox.style.display='none';
+    }
+  }
   if(data.rich_media&&data.rich_media.image_url){figureCard.style.display='flex';figureThumb.src=data.rich_media.image_url;figureLabel.textContent=data.rich_media.title||'Archive Plate';}else{figureCard.style.display='none';}
   document.getElementById('m-hops').textContent=data.hops.length+' Hop'+(data.hops.length!==1?'s':'');
   document.getElementById('m-sources').textContent=data.citations.length+' Source'+(data.citations.length!==1?'s':'');

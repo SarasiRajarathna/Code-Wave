@@ -281,6 +281,7 @@
               <div class="conf-bar-track"><div class="conf-bar-fill" id="conf-bar"></div></div>
             </div>
             <div class="stat-pill"><span>&#10004; Facts:</span><strong id="stat-facts" style="color:var(--emerald)">&mdash;</strong></div>
+            <div class="stat-pill"><span>&#128218; Consensus:</span><strong id="stat-corroboration" style="color:var(--cyan)">&mdash;</strong></div>
             <div class="stat-pill"><span>Hallucination Risk:</span><strong style="color:var(--emerald)">0.0%</strong></div>
           </div>
         </div>
@@ -317,6 +318,10 @@
               </div>
               <div id="critic-notes" style="font-size:12px;color:var(--text-muted);line-height:1.5;"></div>
               <div id="critic-stats" style="font-size:11px;color:var(--text-faint);font-family:'JetBrains Mono',monospace;display:flex;gap:14px;margin-top:4px;"></div>
+              <div id="critic-sub-meta" style="display:flex;gap:10px;flex-wrap:wrap;font-size:11px;margin-top:4px;">
+                <span id="anachronism-tag" style="color:#a5b4fc;background:rgba(99,102,241,.12);padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;">&#9203; Chronology: Coherent</span>
+                <span id="counter-tag" style="color:#6ee7b7;background:rgba(52,211,153,.12);padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;">&#128737;&#65039; Dissent Check: Unified Consensus</span>
+              </div>
             </div>
             <div id="leads-section" style="display:none;margin-top:16px;">
               <hr class="card-divider" style="margin-bottom:12px;">
@@ -667,8 +672,47 @@ function renderWorkspace(data){
         '<span>Factual Alignment: <strong style="color:var(--gold-light);">'+(cr.alignment_score*100).toFixed(0)+'%</strong></span>' +
         '<span>Verified Sentences: <strong style="color:var(--emerald);">'+cr.verified_claims_count+'</strong></span>' +
         '<span>Cautious Phrasing: <strong style="color:var(--amber);">'+cr.cautious_claims_count+'</strong></span>';
+
+      const an=data.anachronism;
+      const anTag=document.getElementById('anachronism-tag');
+      if(anTag){
+        if(an&&an.is_anachronistic){
+          anTag.textContent='⚠️ '+an.coherence_status.replace('_',' ')+' ('+an.temporal_span_years+'y delta)';
+          anTag.style.color='var(--amber)';
+          anTag.style.background='rgba(251,146,60,.12)';
+        }else{
+          anTag.textContent='⏱️ Chronology: Coherent';
+          anTag.style.color='#a5b4fc';
+          anTag.style.background='rgba(99,102,241,.12)';
+        }
+      }
+
+      const ce=data.counter_evidence;
+      const ceTag=document.getElementById('counter-tag');
+      if(ceTag){
+        if(ce&&ce.has_counter_evidence){
+          ceTag.textContent='⚠️ Dissent Identified ('+ce.dissent_count+' records)';
+          ceTag.style.color='var(--amber)';
+          ceTag.style.background='rgba(251,146,60,.12)';
+        }else{
+          ceTag.textContent='🛡️ Dissent Check: Unified Consensus';
+          ceTag.style.color='#6ee7b7';
+          ceTag.style.background='rgba(52,211,153,.12)';
+        }
+      }
     }else{
       crBox.style.display='none';
+    }
+  }
+
+  const cor=data.corroboration;
+  const corStat=document.getElementById('stat-corroboration');
+  if(corStat){
+    if(cor){
+      corStat.textContent=cor.consensus_level.replace('_',' ')+' ('+cor.independent_sources_count+' docs)';
+      corStat.style.color=cor.consensus_level==='HIGH_CONSENSUS'?'var(--emerald)':cor.consensus_level==='DUAL_CORROBORATED'?'var(--cyan)':'var(--amber)';
+    }else{
+      corStat.textContent='--';
     }
   }
 

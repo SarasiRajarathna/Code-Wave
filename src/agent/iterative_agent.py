@@ -21,8 +21,12 @@ from retrieval.hybrid import HybridRetriever
 from retrieval.knowledge_graph import AshenKnowledgeGraph
 from retrieval.chronology import LoreChronologyEngine
 from retrieval.decomposer import QueryDecomposer
+from retrieval.aliases import EntityAliasResolver
+from retrieval.corroboration import CorroborationMatrix
+from retrieval.anachronism import AnachronismChecker
 from agent.proof_of_absence import ProofOfAbsenceEngine
 from agent.critic import ArchivistCritic
+from agent.counter_evidence import CounterEvidenceProber
 from llm.client import OpenRouterLLM, GROUNDING_SYSTEM_PROMPT
 from agent.rich_media import RichMediaResolver
 from utils.cache import SimpleDiskCache
@@ -57,6 +61,10 @@ class AgentResult:
     critic_evaluation: Optional[Dict[str, Any]] = None
     source_perspective: Optional[Dict[str, Any]] = None
     investigation_leads: List[Dict[str, str]] = field(default_factory=list)
+    corroboration: Optional[Dict[str, Any]] = None
+    anachronism: Optional[Dict[str, Any]] = None
+    counter_evidence: Optional[Dict[str, Any]] = None
+    resolved_aliases: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -88,6 +96,10 @@ class AgentResult:
             "critic_evaluation": self.critic_evaluation,
             "source_perspective": self.source_perspective,
             "investigation_leads": self.investigation_leads,
+            "corroboration": self.corroboration,
+            "anachronism": self.anachronism,
+            "counter_evidence": self.counter_evidence,
+            "resolved_aliases": self.resolved_aliases,
         }
 
 
@@ -111,6 +123,10 @@ class AshenIterativeAgent:
         self.decomposer = QueryDecomposer(llm=self.llm)
         self.proof_engine = ProofOfAbsenceEngine()
         self.critic = ArchivistCritic(llm=self.llm, kg=self.kg)
+        self.alias_resolver = EntityAliasResolver()
+        self.corroboration_matrix = CorroborationMatrix()
+        self.anachronism_checker = AnachronismChecker()
+        self.counter_prober = CounterEvidenceProber()
 
     def run(self, question: str, verbose: bool = True, no_cache: bool = False) -> AgentResult:
         """Execute human-like iterative search workflow for the user query."""
@@ -138,6 +154,11 @@ class AshenIterativeAgent:
                 if not leads:
                     leads = self.critic.generate_investigation_leads(question, cached_data["answer"], [])
 
+                corroboration = cached_data.get("corroboration") or self.corroboration_matrix.evaluate(cached_data["answer"], [{"metadata": {"source_file": c}} for c in cached_data.get("citations", [])])
+                anachronism = cached_data.get("anachronism") or self.anachronism_checker.check_coherence(question, cached_data["answer"], cached_data.get("timeline_events", []))
+                counter_evidence = cached_data.get("counter_evidence") or self.counter_prober.probe(question, cached_data["answer"], [])
+                resolved_aliases = cached_data.get("resolved_aliases", [])
+
                 return AgentResult(
                     question=question,
                     answer=cached_data["answer"],
@@ -157,7 +178,11 @@ class AshenIterativeAgent:
                     proof_of_absence=cached_data.get("proof_of_absence"),
                     critic_evaluation=critic_eval,
                     source_perspective=source_persp,
-                    investigation_leads=leads
+                    investigation_leads=leads,
+                    corroboration=corroboration,
+                    anachronism=anachronism,
+                    counter_evidence=counter_evidence,
+                    resolved_aliases=resolved_aliases
                 )
 
         seen_chunk_ids: Set[str] = set()
@@ -275,6 +300,12 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
         source_perspective = self.critic.determine_source_perspective(accumulated_chunks)
         investigation_leads = self.critic.generate_investigation_leads(question, answer, accumulated_chunks)
 
+        # 13. Advanced Cognition: Corroboration Matrix, Anachronism Check & Counter-Evidence Probing
+        corroboration = self.corroboration_matrix.evaluate(answer, accumulated_chunks)
+        anachronism = self.anachronism_checker.check_coherence(question, answer, timeline_events)
+        counter_evidence = self.counter_prober.probe(question, answer, accumulated_chunks)
+        resolved_aliases = self.alias_resolver.get_known_aliases(question)
+
         result = AgentResult(
             question=question,
             answer=answer,
@@ -294,7 +325,11 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             proof_of_absence=proof_of_absence,
             critic_evaluation=critic_evaluation,
             source_perspective=source_perspective,
-            investigation_leads=investigation_leads
+            investigation_leads=investigation_leads,
+            corroboration=corroboration,
+            anachronism=anachronism,
+            counter_evidence=counter_evidence,
+            resolved_aliases=resolved_aliases
         )
 
         # Only cache definitive answers, do not cache transient offline fallback notes
@@ -453,6 +488,26 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             "data": {"leads": investigation_leads}
         }
 
+        corroboration = self.corroboration_matrix.evaluate(answer, accumulated_chunks)
+        yield {
+            "event": "corroboration",
+            "data": corroboration
+        }
+
+        anachronism = self.anachronism_checker.check_coherence(question, answer, timeline_events)
+        yield {
+            "event": "anachronism",
+            "data": anachronism
+        }
+
+        counter_evidence = self.counter_prober.probe(question, answer, accumulated_chunks)
+        yield {
+            "event": "counter_evidence",
+            "data": counter_evidence
+        }
+
+        resolved_aliases = self.alias_resolver.get_known_aliases(question)
+
         result = AgentResult(
             question=question,
             answer=answer,
@@ -472,7 +527,11 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             proof_of_absence=proof_of_absence,
             critic_evaluation=critic_evaluation,
             source_perspective=source_perspective,
-            investigation_leads=investigation_leads
+            investigation_leads=investigation_leads,
+            corroboration=corroboration,
+            anachronism=anachronism,
+            counter_evidence=counter_evidence,
+            resolved_aliases=resolved_aliases
         )
 
         yield {

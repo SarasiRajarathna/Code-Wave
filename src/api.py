@@ -106,6 +106,10 @@ class QueryResponse(BaseModel):
     critic_evaluation: Optional[Dict[str, Any]] = None
     source_perspective: Optional[Dict[str, Any]] = None
     investigation_leads: Optional[List[Dict[str, str]]] = None
+    corroboration: Optional[Dict[str, Any]] = None
+    anachronism: Optional[Dict[str, Any]] = None
+    counter_evidence: Optional[Dict[str, Any]] = None
+    resolved_aliases: Optional[List[str]] = None
 
 
 class SampleQuestion(BaseModel):
@@ -270,7 +274,11 @@ def query_agent(payload: QueryRequest):
             proof_of_absence=getattr(res, "proof_of_absence", None),
             critic_evaluation=getattr(res, "critic_evaluation", None),
             source_perspective=getattr(res, "source_perspective", None),
-            investigation_leads=getattr(res, "investigation_leads", [])
+            investigation_leads=getattr(res, "investigation_leads", []),
+            corroboration=getattr(res, "corroboration", None),
+            anachronism=getattr(res, "anachronism", None),
+            counter_evidence=getattr(res, "counter_evidence", None),
+            resolved_aliases=getattr(res, "resolved_aliases", [])
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI Agent query execution failed: {str(e)}")

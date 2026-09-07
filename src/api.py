@@ -98,6 +98,7 @@ class QueryResponse(BaseModel):
     verified_facts_count: int
     reasoning_graph: Optional[str] = None
     contradictions: Optional[List[Dict[str, Any]]] = None
+    kg_triplets: Optional[List[Dict[str, Any]]] = None
 
 
 class SampleQuestion(BaseModel):
@@ -255,10 +256,18 @@ def query_agent(payload: QueryRequest):
             grounding_score=getattr(res, "grounding_score", 0.98),
             verified_facts_count=getattr(res, "verified_facts_count", 0),
             reasoning_graph=getattr(res, "reasoning_graph", None),
-            contradictions=getattr(res, "contradictions", None)
+            contradictions=getattr(res, "contradictions", None),
+            kg_triplets=getattr(res, "kg_triplets", [])
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI Agent query execution failed: {str(e)}")
+
+
+@app.get("/api/graph", tags=["Knowledge Graph"])
+def get_knowledge_graph():
+    """Return the entire archival Knowledge Graph topology, nodes, and relational edges."""
+    agent = get_agent()
+    return agent.kg.to_dict()
 
 
 @app.get("/api/image/{filename}", tags=["Media"])

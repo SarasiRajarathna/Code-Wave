@@ -40,11 +40,19 @@ def test_fastapi_endpoints():
     assert len(data) >= 5, f"Too few samples: {len(data)}"
     print(f"  [PASS] Samples retrieved: {len(data)} competition questions.")
 
-    print("\n[TEST API 4/5] Testing GET /api/stats ...")
+    print("\n[TEST API 4/6] Testing GET /api/stats ...")
     r = client.get("/api/stats")
     assert r.status_code == 200, f"Failed: {r.text}"
     stats = r.json()
     print(f"  [PASS] System stats: {stats['vector_store']['total_chunks']} chunks in {stats['vector_store']['type']}")
+
+    print("\n[TEST API 5/7] Testing GET /api/graph (Knowledge Graph Topology) ...")
+    r_kg = client.get("/api/graph")
+    assert r_kg.status_code == 200, f"Failed: {r_kg.text}"
+    kg_json = r_kg.json()
+    assert kg_json["stats"]["total_nodes"] >= 90, f"Too few nodes: {kg_json['stats']['total_nodes']}"
+    assert kg_json["stats"]["total_edges"] >= 150, f"Too few edges: {kg_json['stats']['total_edges']}"
+    print(f"  [PASS] Knowledge Graph: {kg_json['stats']['total_nodes']} nodes, {kg_json['stats']['total_edges']} edges.")
 
     print("\n[TEST API 5/5] Testing POST /api/query ...")
     payload = {

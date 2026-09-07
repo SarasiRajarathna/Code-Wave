@@ -588,6 +588,7 @@
       </div>
       <div class="status-pills">
         <div class="pill gold"><span class="pill-dot"></span> <span id="status-model">Loading Model...</span></div>
+        <div class="pill gold"><span class="pill-dot"></span> <span id="status-kg">KG: 98 Nodes</span></div>
         <div class="pill"><span id="status-chunks">1,737 Chunks Indexed</span></div>
         <div class="pill">RRF Fusion + Reranker</div>
         <a href="/docs" target="_blank" class="pill link">OpenAPI Docs ↗</a>
@@ -676,6 +677,16 @@
             <p style="color: var(--text-faint); font-size: 13px;">Reasoning hops and search queries will appear here.</p>
           </div>
         </article>
+
+        <!-- Relational Knowledge Graph Triples Card -->
+        <article id="kg-card" class="glass-card" style="display: none;">
+          <div class="card-header">
+            <h2 class="card-title">🕸️ Relational Knowledge Graph Triples</h2>
+            <span id="kg-counter" class="pill">0 Triples</span>
+          </div>
+          <div id="kg-triplets-list" style="display: flex; flex-wrap: wrap; gap: 8px;">
+          </div>
+        </article>
       </div>
 
       <!-- Right Column: Citations & Rich Media -->
@@ -755,6 +766,11 @@
           const data = await res.json();
           document.getElementById('status-model').textContent = `${data.active_model.split(':')[0]}`;
           document.getElementById('status-chunks').textContent = `${data.vector_chunks.toLocaleString()} Chunks`;
+        }
+        const kgRes = await fetch('/api/graph');
+        if (kgRes.ok) {
+          const kgData = await kgRes.json();
+          document.getElementById('status-kg').textContent = `KG: ${kgData.stats.total_nodes} Nodes (${kgData.stats.total_edges} Edges)`;
         }
       } catch (err) {
         document.getElementById('status-model').textContent = 'Backend Offline';
@@ -849,7 +865,26 @@
         traversalTimeline.appendChild(node);
       });
 
-      // 5. Pinpointed Citations
+      // 5. Relational Knowledge Graph Triples
+      const kgCard = document.getElementById('kg-card');
+      const kgTripletsList = document.getElementById('kg-triplets-list');
+      const kgCounter = document.getElementById('kg-counter');
+      if (data.kg_triplets && data.kg_triplets.length > 0) {
+        kgCard.style.display = 'flex';
+        kgCounter.textContent = `${data.kg_triplets.length} Relational Triple${data.kg_triplets.length > 1 ? 's' : ''}`;
+        kgTripletsList.innerHTML = '';
+        data.kg_triplets.forEach(t => {
+          const chip = document.createElement('div');
+          chip.className = 'chip';
+          chip.style.cssText = 'border-color: rgba(212, 175, 55, 0.4); color: #fff; background: rgba(14, 22, 36, 0.9); padding: 8px 12px; font-size: 12px;';
+          chip.innerHTML = `<strong>${t.subject}</strong> <span style="color: var(--cyan-accent); font-weight: 700; margin: 0 4px;">─[${t.predicate}]─►</span> <strong>${t.object}</strong>`;
+          kgTripletsList.appendChild(chip);
+        });
+      } else {
+        kgCard.style.display = 'none';
+      }
+
+      // 6. Pinpointed Citations
       citationsCounter.textContent = `${data.pinpointed_citations.length || data.citations.length} Sources`;
       citationsList.innerHTML = '';
       if (data.pinpointed_citations && data.pinpointed_citations.length > 0) {

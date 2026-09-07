@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Set
 
 from retrieval.hybrid import HybridRetriever
+from retrieval.knowledge_graph import AshenKnowledgeGraph
 from llm.client import OpenRouterLLM, GROUNDING_SYSTEM_PROMPT
 from agent.rich_media import RichMediaResolver
 from utils.cache import SimpleDiskCache
@@ -45,6 +46,7 @@ class AgentResult:
     reasoning_graph: Optional[str] = None
     pinpointed_citations: List[Dict[str, str]] = field(default_factory=list)
     contradictions: List[Dict[str, Any]] = field(default_factory=list)
+    kg_triplets: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -69,6 +71,7 @@ class AgentResult:
             "reasoning_graph": self.reasoning_graph,
             "pinpointed_citations": self.pinpointed_citations,
             "contradictions": self.contradictions,
+            "kg_triplets": self.kg_triplets,
         }
 
 
@@ -87,6 +90,7 @@ class AshenIterativeAgent:
         self.rich_media = rich_media or RichMediaResolver()
         self.max_hops = max_hops
         self.cache = SimpleDiskCache()
+        self.kg = AshenKnowledgeGraph()
 
     def run(self, question: str, verbose: bool = True, no_cache: bool = False) -> AgentResult:
         """Execute human-like iterative search workflow for the user query."""
@@ -113,12 +117,17 @@ class AshenIterativeAgent:
                     verified_facts_count=cached_data.get("verified_facts_count", 0),
                     reasoning_graph=reasoning_graph,
                     pinpointed_citations=cached_data.get("pinpointed_citations", []),
-                    contradictions=cached_data.get("contradictions", [])
+                    contradictions=cached_data.get("contradictions", []),
+                    kg_triplets=cached_data.get("kg_triplets", [])
                 )
 
         seen_chunk_ids: Set[str] = set()
         accumulated_chunks: List[Dict[str, Any]] = []
         hops: List[SearchHop] = []
+
+        # Extract Knowledge Graph relations & entity context
+        kg_context = self.kg.get_graph_context(question)
+        kg_triplets = kg_context.get("triplets", [])
 
         current_query = question
         is_sufficient = False
@@ -175,8 +184,12 @@ class AshenIterativeAgent:
             print("[Agent] Synthesizing final grounded response...")
 
         final_context = self._format_context(accumulated_chunks)
+        kg_facts_str = ""
+        if kg_context.get("key_facts"):
+            kg_facts_str = "\n\nRELATIONAL KNOWLEDGE GRAPH CONTEXT:\n" + "\n".join(f"- {f}" for f in kg_context["key_facts"][:5])
+
         synthesis_prompt = f"""CONTEXT PASSAGES:
-{final_context}
+{final_context}{kg_facts_str}
 
 QUESTION: {question}
 
@@ -217,7 +230,8 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             verified_facts_count=verification["grounded_numbers"],
             reasoning_graph=reasoning_graph,
             pinpointed_citations=pinpointed_citations,
-            contradictions=contradictions
+            contradictions=contradictions,
+            kg_triplets=kg_triplets
         )
 
         # Only cache definitive answers, do not cache transient offline fallback notes

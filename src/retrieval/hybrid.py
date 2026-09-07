@@ -23,12 +23,14 @@ class HybridRetriever:
         bm25_retriever: Optional[AshenBM25Retriever] = None,
         embedding_model: Optional[BaseEmbeddingModel] = None,
         rrf_k: int = 60,
+        kg: Optional[Any] = None,
     ):
         self.vector_store = vector_store or AshenVectorStore()
         self.bm25 = bm25_retriever or AshenBM25Retriever()
         self.embedding_model = embedding_model or get_embedding_model(provider="local")
         self.rrf_k = rrf_k
         self.reranker = SemanticReranker(embedding_model=self.embedding_model)
+        self.kg = kg
 
     def search(
         self,
@@ -40,11 +42,18 @@ class HybridRetriever:
         rerank: bool = True,
     ) -> List[Dict[str, Any]]:
         """Execute hybrid search using Reciprocal Rank Fusion."""
+        search_query = query
+        if self.kg:
+            for alias, canonical in self.kg.alias_map.items():
+                if len(alias) >= 5 and alias in query.lower() and canonical.lower() not in query.lower():
+                    search_query = f"{query} {canonical}"
+                    break
+
         # 1. Fetch dense vector results
         where_filter = {"source_type": source_type_filter} if source_type_filter else None
         try:
             dense_results = self.vector_store.search(
-                query_text=query,
+                query_text=search_query,
                 embedding_model=self.embedding_model,
                 n_results=top_k * 2,
                 where_filter=where_filter,

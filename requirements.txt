@@ -5,3 +5,6 @@ pillow
 chromadb
 sentence-transformers
 voyageai
+rank-bm25
+openai
+python-dotenv

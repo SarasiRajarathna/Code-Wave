@@ -101,6 +101,7 @@ class QueryResponse(BaseModel):
     contradictions: Optional[List[Dict[str, Any]]] = None
     kg_triplets: Optional[List[Dict[str, Any]]] = None
     timeline_events: Optional[List[Dict[str, Any]]] = None
+    decomposed_queries: Optional[List[str]] = None
 
 
 class SampleQuestion(BaseModel):
@@ -260,7 +261,8 @@ def query_agent(payload: QueryRequest):
             reasoning_graph=getattr(res, "reasoning_graph", None),
             contradictions=getattr(res, "contradictions", None),
             kg_triplets=getattr(res, "kg_triplets", []),
-            timeline_events=getattr(res, "timeline_events", [])
+            timeline_events=getattr(res, "timeline_events", []),
+            decomposed_queries=getattr(res, "decomposed_queries", [])
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI Agent query execution failed: {str(e)}")

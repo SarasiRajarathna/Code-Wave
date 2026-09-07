@@ -20,6 +20,7 @@ from typing import List, Dict, Any, Optional, Set
 from retrieval.hybrid import HybridRetriever
 from retrieval.knowledge_graph import AshenKnowledgeGraph
 from retrieval.chronology import LoreChronologyEngine
+from retrieval.decomposer import QueryDecomposer
 from llm.client import OpenRouterLLM, GROUNDING_SYSTEM_PROMPT
 from agent.rich_media import RichMediaResolver
 from utils.cache import SimpleDiskCache
@@ -49,6 +50,7 @@ class AgentResult:
     contradictions: List[Dict[str, Any]] = field(default_factory=list)
     kg_triplets: List[Dict[str, Any]] = field(default_factory=list)
     timeline_events: List[Dict[str, Any]] = field(default_factory=list)
+    decomposed_queries: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -75,6 +77,7 @@ class AgentResult:
             "contradictions": self.contradictions,
             "kg_triplets": self.kg_triplets,
             "timeline_events": self.timeline_events,
+            "decomposed_queries": self.decomposed_queries,
         }
 
 
@@ -95,6 +98,7 @@ class AshenIterativeAgent:
         self.cache = SimpleDiskCache()
         self.kg = AshenKnowledgeGraph()
         self.chronology = LoreChronologyEngine()
+        self.decomposer = QueryDecomposer(llm=self.llm)
 
     def run(self, question: str, verbose: bool = True, no_cache: bool = False) -> AgentResult:
         """Execute human-like iterative search workflow for the user query."""
@@ -123,18 +127,26 @@ class AshenIterativeAgent:
                     pinpointed_citations=cached_data.get("pinpointed_citations", []),
                     contradictions=cached_data.get("contradictions", []),
                     kg_triplets=cached_data.get("kg_triplets", []),
-                    timeline_events=cached_data.get("timeline_events", [])
+                    timeline_events=cached_data.get("timeline_events", []),
+                    decomposed_queries=cached_data.get("decomposed_queries", [])
                 )
 
         seen_chunk_ids: Set[str] = set()
         accumulated_chunks: List[Dict[str, Any]] = []
         hops: List[SearchHop] = []
 
+        # Cognitive Query Decomposition
+        decomposed = self.decomposer.decompose(question)
+        if verbose and len(decomposed) > 1:
+            print(f"[Agent] Decomposed compound query into {len(decomposed)} sub-queries:")
+            for i, sq in enumerate(decomposed, 1):
+                print(f"        Step {i}: {sq}")
+
         # Extract Knowledge Graph relations & entity context
         kg_context = self.kg.get_graph_context(question)
         kg_triplets = kg_context.get("triplets", [])
 
-        current_query = question
+        current_query = decomposed[0] if decomposed else question
         is_sufficient = False
 
         for hop_idx in range(1, self.max_hops + 1):
@@ -240,7 +252,8 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             pinpointed_citations=pinpointed_citations,
             contradictions=contradictions,
             kg_triplets=kg_triplets,
-            timeline_events=timeline_events
+            timeline_events=timeline_events,
+            decomposed_queries=decomposed
         )
 
         # Only cache definitive answers, do not cache transient offline fallback notes
@@ -267,7 +280,15 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
         seen_chunk_ids: Set[str] = set()
         accumulated_chunks: List[Dict[str, Any]] = []
         hops: List[SearchHop] = []
-        current_query = question
+
+        decomposed = self.decomposer.decompose(question)
+        if len(decomposed) > 1:
+            yield {
+                "event": "sub_queries",
+                "data": {"decomposed": decomposed}
+            }
+
+        current_query = decomposed[0] if decomposed else question
         is_sufficient = False
 
         # 2. Multi-Hop Traversal Loop
@@ -381,7 +402,8 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             pinpointed_citations=pinpointed_citations,
             contradictions=contradictions,
             kg_triplets=kg_triplets,
-            timeline_events=timeline_events
+            timeline_events=timeline_events,
+            decomposed_queries=decomposed
         )
 
         yield {

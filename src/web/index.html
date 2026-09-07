@@ -337,6 +337,10 @@
             <h2 class="card-title">&#128378;&#65039; Sub-track 1C &mdash; Multi-Hop Reasoning Trail</h2>
             <span id="traversal-pill" class="badge-pill">Awaiting query</span>
           </div>
+          <div id="decomposed-pills" style="display:none;padding:10px 14px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--cyan);line-height:1.6;">
+            <strong>Cognitive Query Decomposition:</strong>
+            <div id="decomposed-list" style="display:flex;flex-direction:column;gap:4px;margin-top:6px;"></div>
+          </div>
           <div class="timeline-wrap" id="timeline-list"><div class="history-empty">Run a research query to see the step-by-step reasoning trail.</div></div>
         </article>
       </section>
@@ -470,6 +474,7 @@ async function executeResearch(){
   document.getElementById('conflict-box').classList.remove('show');
   figureCard.style.display='none';tripletsSection.style.display='none';
   if(document.getElementById('timeline-events-section')) document.getElementById('timeline-events-section').style.display='none';
+  if(document.getElementById('decomposed-pills')) document.getElementById('decomposed-pills').style.display='none';
   answerBox.className='';answerBox.innerHTML='';
   timelineList.innerHTML='';
   startLoading();
@@ -519,6 +524,14 @@ async function executeResearch(){
               // Real-time stage updates
               const msg=ev.data.message||'';
               btnLabel.textContent=msg.length>22?msg.slice(0,22)+'...':msg.toUpperCase();
+            }else if(ev.event==='sub_queries'){
+              const decList=ev.data.decomposed||[];
+              const decPills=document.getElementById('decomposed-pills');
+              const decContainer=document.getElementById('decomposed-list');
+              if(decPills&&decContainer&&decList.length>1){
+                decPills.style.display='block';
+                decContainer.innerHTML=decList.map((q,i)=>'<span style="color:#e2e8f0;font-family:\'JetBrains Mono\',monospace;">Step '+(i+1)+': '+esc(q)+'</span>').join('');
+              }
             }else if(ev.event==='kg_triplets'){
               const triplets=ev.data.triplets||[];
               if(triplets.length>0){
@@ -623,6 +636,18 @@ function renderWorkspace(data){
 
   const cntT=document.getElementById('cnt-traversal');cntT.textContent=data.hops.length;cntT.classList.toggle('show',data.hops.length>0);
   document.getElementById('traversal-pill').textContent=data.hops.length+' Hop'+(data.hops.length!==1?'s':'');
+
+  const decList=data.decomposed_queries||[];
+  const decPills=document.getElementById('decomposed-pills');
+  const decContainer=document.getElementById('decomposed-list');
+  if(decPills&&decContainer){
+    if(decList.length>1){
+      decPills.style.display='block';
+      decContainer.innerHTML=decList.map((q,i)=>'<span style="color:#e2e8f0;font-family:\'JetBrains Mono\',monospace;">Step '+(i+1)+': '+esc(q)+'</span>').join('');
+    }else{
+      decPills.style.display='none';
+    }
+  }
   timelineList.innerHTML='';
   if(data.hops.length===0){timelineList.innerHTML='<div class="history-empty">Single-hop query. No iterative traversal required.</div>';}
   else{data.hops.forEach(h=>{const node=document.createElement('div');node.className='timeline-node';node.setAttribute('data-hop',h.hop);node.innerHTML='<div class="timeline-card"><div class="timeline-hop-label"><span>Hop '+h.hop+'</span><span class="timeline-tag">EVALUATED</span></div><div class="timeline-query">'+esc(h.query)+'</div>'+(h.thought?'<div class="timeline-thought">'+esc(h.thought)+'</div>':'')+'</div>';timelineList.appendChild(node);});}

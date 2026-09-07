@@ -45,17 +45,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import threading
+
 # Global Agent Singleton
 _agent_instance: Optional[AshenIterativeAgent] = None
+_agent_lock = threading.Lock()
 
 
 def get_agent() -> AshenIterativeAgent:
     global _agent_instance
     if _agent_instance is None:
-        embedder = get_embedding_model(provider="local")
-        retriever = HybridRetriever(embedding_model=embedder)
-        _agent_instance = AshenIterativeAgent(retriever=retriever, max_hops=3)
+        with _agent_lock:
+            if _agent_instance is None:
+                embedder = get_embedding_model(provider="local")
+                retriever = HybridRetriever(embedding_model=embedder)
+                _agent_instance = AshenIterativeAgent(retriever=retriever, max_hops=3)
     return _agent_instance
+
+
+@app.on_event("startup")
+def startup_event():
+    """Pre-warm AI agent singleton on server startup."""
+    get_agent()
 
 
 # -------------------------------------------------------------------------
@@ -333,7 +344,7 @@ def get_knowledge_graph():
 def get_image(filename: str):
     """Serve archive figure plates and illustrations directly to frontend."""
     agent = get_agent()
-    resolver = agent.rich_resolver
+    resolver = agent.rich_media
     clean_stem = Path(filename).stem.lower()
 
     if clean_stem in resolver.image_index:
@@ -423,4 +434,4 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     print(f"Starting Code-Wave FastAPI Server on http://0.0.0.0:{port}")
     print(f"Swagger Documentation: http://localhost:{port}/docs")
-    uvicorn.run("src.api:app", host="0.0.0.0", port=port, reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=port)

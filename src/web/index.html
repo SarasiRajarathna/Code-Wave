@@ -1722,17 +1722,23 @@ async function executeResearch() {
   let finalResultObj = null;
 
   try {
-    const res = await fetch('/api/query/stream', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: query, max_hops: 3, no_cache: false })
-    });
+    let usedStreaming = false;
+    let streamRes = null;
+    try {
+      streamRes = await fetch('/api/query/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: query, max_hops: 3, no_cache: false })
+      });
+      if (streamRes.ok) usedStreaming = true;
+    } catch (e) {
+      usedStreaming = false;
+    }
 
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = '';
+    if (usedStreaming && streamRes && streamRes.ok) {
+      const reader = streamRes.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
 
     while (true) {
       const { done, value } = await reader.read();
@@ -1787,6 +1793,14 @@ async function executeResearch() {
           } catch (parseErr) {}
         }
       }
+    } else {
+      const syncRes = await fetch('/api/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: query, max_hops: 3, no_cache: false })
+      });
+      if (!syncRes.ok) throw new Error('HTTP ' + syncRes.status);
+      finalResultObj = await syncRes.json();
     }
 
     if (finalResultObj) {

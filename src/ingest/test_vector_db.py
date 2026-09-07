@@ -1,11 +1,14 @@
+"""
+test_vector_db.py
+
+Query testing script to verify vector database search quality and metadata retrieval.
+"""
+
 import sys
 from pathlib import Path
 
-src_dir = Path(__file__).parent
-if str(src_dir) not in sys.path:
-    sys.path.insert(0, str(src_dir))
-
-workspace_root = src_dir.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]  # this file lives at src/ingest/<name>.py
+sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import argparse
 from ingest.embeddings import get_embedding_model
@@ -21,12 +24,11 @@ SAMPLE_QUESTIONS = [
 
 
 def test_queries(provider: str = "local", top_k: int = 3):
-    vector_store_dir = str(workspace_root / "data" / "vector_store")
     print("Initializing embedding model...")
     embedder = get_embedding_model(provider=provider)
 
     print("Connecting to ChromaDB vector store...")
-    vector_store = AshenVectorStore(persist_directory=vector_store_dir)
+    vector_store = AshenVectorStore(persist_directory=str(REPO_ROOT / "data" / "vector_store"))
     print(f"Vector Store contains {vector_store.count()} indexed chunks.\n")
 
     for q in SAMPLE_QUESTIONS:

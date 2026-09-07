@@ -143,6 +143,57 @@ class OpenRouterLLM:
         print(f"All OpenRouter candidate models exhausted ({last_err}). Falling back to grounded context synthesis.")
         return self._synthesize_offline(prompt)
 
+    def generate_stream(
+        self,
+        prompt: str,
+        system_prompt: str = GROUNDING_SYSTEM_PROMPT,
+        temperature: Optional[float] = None,
+        model_override: Optional[str] = None
+    ):
+        """Stream response token-by-token from OpenRouter API, with graceful offline fallback."""
+        temp = temperature if temperature is not None else self.temperature
+        requested_model = model_override or self.model
+
+        if self.is_online:
+            candidates = [requested_model] + [m for m in FALLBACK_MODELS if m != requested_model]
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt}
+            ]
+            for current_model in candidates:
+                try:
+                    stream = self._client.chat.completions.create(
+                        model=current_model,
+                        messages=messages,
+                        temperature=temp,
+                        max_tokens=800,
+                        stream=True,
+                    )
+                    full_text = []
+                    for chunk in stream:
+                        if chunk.choices and chunk.choices[0].delta.content:
+                            token = chunk.choices[0].delta.content
+                            full_text.append(token)
+                            yield token
+                    # Cache the aggregated stream
+                    cache_key = self.cache.hash_key("llm_gen", requested_model, temp, system_prompt, prompt)
+                    self.cache.set(cache_key, "".join(full_text))
+                    return
+                except Exception as e:
+                    err_str = str(e).lower()
+                    if "429" in err_str or "rate limit" in err_str:
+                        time.sleep(1.5)
+                    continue
+
+        # Offline fallback streaming: yield word by word with micro-delay
+        offline_resp = self._synthesize_offline(prompt)
+        words = re.split(r'(\s+)', offline_resp)
+        for word in words:
+            if word:
+                time.sleep(0.015)
+                yield word
+
+
     def _synthesize_offline(self, prompt: str) -> str:
         """Deterministic offline answer extractor when API key is not supplied.
         Directly extracts grounded evidence sentences from the prompt context."""

@@ -71,6 +71,29 @@ def test_fastapi_endpoints():
     print(f"         Rich Media Image : {resp['rich_media']['image_url'] if resp['rich_media'] else 'None'}")
     print(f"         Reasoning Graph  : {'Present' if resp['reasoning_graph'] else 'None'}")
 
+    print("\n[TEST API 6/6] Testing POST /api/query/stream (Server-Sent Events) ...")
+    r_stream = client.post("/api/query/stream", json={"question": "Where is Greyfell Citadel located?", "max_hops": 1})
+    assert r_stream.status_code == 200, f"Streaming failed: {r_stream.text}"
+    events_found = 0
+    tokens_found = 0
+    final_result_found = False
+    for line in r_stream.iter_lines():
+        if line and line.startswith("data: "):
+            events_found += 1
+            payload_str = line[6:]
+            try:
+                import json
+                ev = json.loads(payload_str)
+                if ev.get("event") == "token":
+                    tokens_found += 1
+                elif ev.get("event") == "final_result":
+                    final_result_found = True
+            except:
+                pass
+    assert events_found > 0, "No SSE events returned"
+    assert final_result_found, "final_result event not found in stream"
+    print(f"  [PASS] Stream verified: {events_found} total events, {tokens_found} streamed tokens, final_result received.")
+
     print("\n===========================================================================")
     print(" [FASTAPI VERIFICATION PASSED] All REST endpoints fully functional!")
     print("===========================================================================\n")

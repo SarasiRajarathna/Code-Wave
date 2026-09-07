@@ -461,16 +461,92 @@ async function executeResearch(){
   document.getElementById('conflict-box').classList.remove('show');
   figureCard.style.display='none';tripletsSection.style.display='none';
   answerBox.className='';answerBox.innerHTML='';
+  timelineList.innerHTML='';
   startLoading();
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.querySelector('[data-tab="tab-synthesis"]').classList.add('active');
   document.getElementById('tab-synthesis').classList.add('active');
+
+  let streamedAnswer='';
+  let finalResultObj=null;
+  let liveHops=[];
+
   try{
-    const res=await fetch('/api/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:query,max_hops:3,no_cache:false})});
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const data=await res.json();
-    currentResult=data;saveHistory(data);renderWorkspace(data);
+    const res=await fetch('/api/query/stream',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:query,max_hops:3,no_cache:false})
+    });
+
+    if(!res.ok){
+      // Graceful fallback to static query if stream endpoint fails
+      const fallbackRes=await fetch('/api/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:query,max_hops:3,no_cache:false})});
+      if(!fallbackRes.ok)throw new Error('HTTP '+fallbackRes.status);
+      const data=await fallbackRes.json();
+      currentResult=data;saveHistory(data);renderWorkspace(data);
+      return;
+    }
+
+    const reader=res.body.getReader();
+    const decoder=new TextDecoder('utf-8');
+    let buffer='';
+
+    while(true){
+      const {done,value}=await reader.read();
+      if(done)break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split('\n');
+      buffer=lines.pop();
+
+      for(const line of lines){
+        if(line.startsWith('data: ')){
+          const jsonStr=line.slice(6).trim();
+          if(!jsonStr)continue;
+          try{
+            const ev=JSON.parse(jsonStr);
+            if(ev.event==='stage'){
+              // Real-time stage updates
+              const msg=ev.data.message||'';
+              btnLabel.textContent=msg.length>22?msg.slice(0,22)+'...':msg.toUpperCase();
+            }else if(ev.event==='kg_triplets'){
+              const triplets=ev.data.triplets||[];
+              if(triplets.length>0){
+                tripletsSection.style.display='block';
+                tripletsGrid.innerHTML=triplets.slice(0,18).map(t=>'<div class="triplet-chip"><span class="tc-sub">'+esc(t.subject)+'</span><span class="tc-rel">'+esc(t.predicate)+'</span><span class="tc-obj">'+esc(t.object)+'</span></div>').join('');
+              }
+            }else if(ev.event==='hop_complete'){
+              liveHops.push(ev.data);
+              const cntT=document.getElementById('cnt-traversal');
+              cntT.textContent=liveHops.length;
+              cntT.classList.add('show');
+              document.getElementById('traversal-pill').textContent=liveHops.length+' Hop'+(liveHops.length!==1?'s':'');
+
+              const node=document.createElement('div');
+              node.className='timeline-node';
+              node.setAttribute('data-hop',ev.data.hop);
+              node.innerHTML='<div class="timeline-card"><div class="timeline-hop-label"><span>Hop '+ev.data.hop+'</span><span class="timeline-tag">'+(ev.data.is_sufficient?'SUFFICIENT':'DISCOVERED')+'</span></div><div class="timeline-query">Search: '+esc(ev.data.query)+'</div>'+(ev.data.thought?'<div class="timeline-thought">'+esc(ev.data.thought)+'</div>':'')+'</div>';
+              timelineList.appendChild(node);
+            }else if(ev.event==='token'){
+              stopLoading();
+              streamedAnswer+=ev.data.token;
+              answerBox.className='answer-text';
+              answerBox.innerHTML=renderMarkdown(streamedAnswer);
+            }else if(ev.event==='final_result'){
+              finalResultObj=ev.data;
+            }
+          }catch(parseErr){}
+        }
+      }
+    }
+
+    if(finalResultObj){
+      currentResult=finalResultObj;
+      saveHistory(finalResultObj);
+      renderWorkspace(finalResultObj);
+    }else if(streamedAnswer){
+      stopLoading();
+    }
   }catch(err){
     stopLoading();
     answerBox.innerHTML='<div style="color:#f43f5e;padding:20px;text-align:center">Investigation failed: '+err.message+'</div>';

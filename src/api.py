@@ -19,8 +19,9 @@ if str(src_dir) not in sys.path:
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse, RedirectResponse, StreamingResponse
 from pydantic import BaseModel, Field
+import json
 
 from ingest.embeddings import get_embedding_model
 from retrieval.hybrid import HybridRetriever
@@ -261,6 +262,38 @@ def query_agent(payload: QueryRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI Agent query execution failed: {str(e)}")
+
+
+@app.post("/api/query/stream", tags=["Query Engine"])
+def query_agent_stream(payload: QueryRequest):
+    """
+    Stream human-like iterative reasoning steps and synthesis answer in real-time via Server-Sent Events (SSE).
+    Yields events: stage, kg_triplets, hop_start, hop_complete, token, and final_result.
+    """
+    if not payload.question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty.")
+
+    agent = get_agent()
+    if payload.max_hops and payload.max_hops != agent.max_hops:
+        agent.max_hops = payload.max_hops
+
+    def sse_event_generator():
+        try:
+            for event in agent.run_stream(payload.question, no_cache=payload.no_cache):
+                yield f"data: {json.dumps(event)}\n\n"
+        except Exception as err:
+            err_payload = {"event": "error", "data": {"message": str(err)}}
+            yield f"data: {json.dumps(err_payload)}\n\n"
+
+    return StreamingResponse(
+        sse_event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
 
 
 @app.get("/api/graph", tags=["Knowledge Graph"])

@@ -239,6 +239,139 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             self.cache.set(cache_key, result.to_dict())
         return result
 
+    def run_stream(self, question: str, no_cache: bool = False):
+        """Execute human-like iterative search workflow and yield real-time SSE stream events."""
+        yield {
+            "event": "stage",
+            "data": {"stage": "kg_expansion", "message": "Expanding query entities via Knowledge Graph..."}
+        }
+
+        # 1. Knowledge Graph Context
+        kg_context = self.kg.get_graph_context(question)
+        kg_triplets = kg_context.get("triplets", [])
+        if kg_triplets:
+            yield {
+                "event": "kg_triplets",
+                "data": {"triplets": kg_triplets[:10]}
+            }
+
+        seen_chunk_ids: Set[str] = set()
+        accumulated_chunks: List[Dict[str, Any]] = []
+        hops: List[SearchHop] = []
+        current_query = question
+        is_sufficient = False
+
+        # 2. Multi-Hop Traversal Loop
+        for hop_idx in range(1, self.max_hops + 1):
+            yield {
+                "event": "hop_start",
+                "data": {"hop": hop_idx, "query": current_query}
+            }
+
+            results = self.retriever.search(current_query, top_k=5)
+            new_chunks = [r for r in results if r["chunk_id"] not in seen_chunk_ids]
+            for r in new_chunks:
+                seen_chunk_ids.add(r["chunk_id"])
+            accumulated_chunks.extend(new_chunks)
+
+            extracted_wikilinks = set()
+            for c in new_chunks:
+                links = re.findall(r"\[\[(.*?)\]\]", c.get("text", ""))
+                extracted_wikilinks.update(links)
+
+            context_summary = self._format_context(accumulated_chunks)
+            evaluation = self._evaluate_sufficiency(question, context_summary, extracted_wikilinks, hop_idx)
+
+            hop_record = SearchHop(
+                hop_number=hop_idx,
+                query=current_query,
+                chunks=new_chunks,
+                thought=evaluation["thought"]
+            )
+            hops.append(hop_record)
+
+            yield {
+                "event": "hop_complete",
+                "data": {
+                    "hop": hop_idx,
+                    "query": current_query,
+                    "thought": evaluation["thought"],
+                    "chunks_count": len(new_chunks),
+                    "is_sufficient": evaluation["sufficient"]
+                }
+            }
+
+            if evaluation["sufficient"] or hop_idx == self.max_hops:
+                is_sufficient = evaluation["sufficient"]
+                break
+
+            current_query = evaluation["next_query"]
+
+        # 3. Grounded Synthesis Streaming
+        yield {
+            "event": "stage",
+            "data": {"stage": "synthesis", "message": "Synthesizing grounded answer with zero-hallucination..."}
+        }
+
+        final_context = self._format_context(accumulated_chunks)
+        kg_facts_str = ""
+        if kg_context.get("key_facts"):
+            kg_facts_str = "\n\nRELATIONAL KNOWLEDGE GRAPH CONTEXT:\n" + "\n".join(f"- {f}" for f in kg_context["key_facts"][:5])
+
+        synthesis_prompt = f"""CONTEXT PASSAGES:
+{final_context}{kg_facts_str}
+
+QUESTION: {question}
+
+Provide a factual, concise, and definitive answer grounded exclusively in the context above.
+Include specific numbers, names, and dates where applicable. Cite the sources."""
+
+        full_answer_parts = []
+        for token in self.llm.generate_stream(
+            prompt=synthesis_prompt,
+            system_prompt=GROUNDING_SYSTEM_PROMPT,
+            temperature=0.1
+        ):
+            full_answer_parts.append(token)
+            yield {
+                "event": "token",
+                "data": {"token": token}
+            }
+
+        answer = "".join(full_answer_parts)
+
+        # 4. Citations & Rich Media
+        citations = self._extract_citations(accumulated_chunks)
+        pinpointed_citations = self._extract_pinpointed_citations(accumulated_chunks, answer)
+        rich_item = self.rich_media.find_relevant_image(question, final_context)
+        if rich_item:
+            answer = answer + rich_item["markdown"]
+
+        contradictions = self._detect_contradictions(question, accumulated_chunks)
+        verification = self._verify_grounding(answer, accumulated_chunks)
+        reasoning_graph = self._build_reasoning_graph(question, hops, answer)
+
+        result = AgentResult(
+            question=question,
+            answer=answer,
+            citations=citations,
+            hops=hops,
+            rich_media=rich_item,
+            is_sufficient=is_sufficient,
+            grounding_score=verification["confidence_score"],
+            grounding_status=verification["status"],
+            verified_facts_count=verification["grounded_numbers"],
+            reasoning_graph=reasoning_graph,
+            pinpointed_citations=pinpointed_citations,
+            contradictions=contradictions,
+            kg_triplets=kg_triplets
+        )
+
+        yield {
+            "event": "final_result",
+            "data": result.to_dict()
+        }
+
     def _format_context(self, chunks: List[Dict[str, Any]]) -> str:
         """Format chunk text with clear document and chapter/page headers."""
         blocks = []

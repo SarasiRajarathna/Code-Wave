@@ -94,6 +94,14 @@ def test_fastapi_endpoints():
     assert final_result_found, "final_result event not found in stream"
     print(f"  [PASS] Stream verified: {events_found} total events, {tokens_found} streamed tokens, final_result received.")
 
+    print("\n[TEST API 7/7] Testing POST /api/benchmark/run (Automated Evaluation Suite) ...")
+    r_bm = client.post("/api/benchmark/run")
+    assert r_bm.status_code == 200, f"Benchmark failed: {r_bm.text}"
+    bm_data = r_bm.json()
+    assert bm_data["summary"]["total_cases"] == 6, f"Expected 6 cases, got {bm_data['summary']['total_cases']}"
+    assert bm_data["summary"]["pass_rate_pct"] == 100.0, f"Expected 100% pass, got {bm_data['summary']['pass_rate_pct']}%"
+    print(f"  [PASS] Live Benchmark: {bm_data['summary']['passed_cases']}/{bm_data['summary']['total_cases']} cases passed ({bm_data['summary']['pass_rate_pct']}%), Grounding: {bm_data['summary']['avg_grounding_pct']}%, Zero-Hallucination: {bm_data['summary']['zero_hallucination_rate_pct']}%.")
+
     print("\n===========================================================================")
     print(" [FASTAPI VERIFICATION PASSED] All REST endpoints fully functional!")
     print("===========================================================================\n")

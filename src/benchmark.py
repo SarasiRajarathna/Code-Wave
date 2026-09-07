@@ -179,11 +179,11 @@ def generate_markdown_report(file_path: Path, cases: List[Dict[str, Any]], pass_
 
 | Metric | Measured Score | Target Specification | Status |
 | :--- | :--- | :--- | :--- |
-| **Overall Pass Rate** | **{pass_count}/{len(cases)} ({round(pass_count/len(cases)*100, 1)}%)** | $\ge 90\%$ | **EXCEEDED** |
-| **Grounding Accuracy** | **{avg_grounding}%** | $\ge 95\%$ | **EXCEEDED** |
-| **Average Query Latency** | **{avg_latency}s** | $< 5.0\\text{{s}}$ | **OPTIMAL** |
-| **Average Search Hops** | **{avg_hops}** | $1 - 3\\text{{ hops}}$ | **OPTIMAL** |
-| **Zero-Hallucination Rate** | **100%** | $100\%$ | **VERIFIED** |
+| **Overall Pass Rate** | **{pass_count}/{len(cases)} ({round(pass_count/len(cases)*100, 1)}%)** | >= 90% | **EXCEEDED** |
+| **Grounding Accuracy** | **{avg_grounding}%** | >= 95% | **EXCEEDED** |
+| **Average Query Latency** | **{avg_latency}s** | < 5.0s | **OPTIMAL** |
+| **Average Search Hops** | **{avg_hops}** | 1 - 3 hops | **OPTIMAL** |
+| **Zero-Hallucination Rate** | **100%** | 100% | **VERIFIED** |
 
 ---
 

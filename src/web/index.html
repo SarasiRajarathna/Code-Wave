@@ -1375,6 +1375,12 @@
               <span id="perspective-tier" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);background:var(--cyan-subtle);padding:2px 8px;border-radius:4px;"></span>
             </div>
 
+            <!-- Coreference Disambiguation Ribbon -->
+            <div id="coref-ribbon" style="display:none;align-items:center;gap:8px;font-size:12px;padding:8px 12px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.3);border-radius:var(--radius-sm);margin-top:6px;">
+              <span style="color:var(--cyan);font-weight:600;">🔗 Context Disambiguation:</span>
+              <span id="coref-text" style="color:var(--text-secondary);"></span>
+            </div>
+
             <!-- Main Answer -->
             <div id="answer-box">
               <div class="answer-placeholder">
@@ -1453,6 +1459,58 @@
                   <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;margin-top:8px;">
                     <span id="anachronism-tag" style="padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;">⏱️ Chronology: Coherent</span>
                     <span id="counter-tag" style="padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;">🛡️ Dissent Check: Unified</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 5: Metacognitive Inner Monologue & Researcher's Scratchpad -->
+              <div class="accord-item" id="accord-monologue" style="display:none;">
+                <div class="accord-header">
+                  <span style="display:flex;align-items:center;gap:8px;">
+                    <span>💡</span>
+                    <strong style="color:var(--cyan);">Researcher's Metacognitive Scratchpad &amp; Inner Monologue</strong>
+                  </span>
+                  <span class="accord-arrow">▼</span>
+                </div>
+                <div class="accord-content">
+                  <div style="margin-bottom:10px;">
+                    <div style="font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">1. Initial Intuition &amp; Hypothesizing</div>
+                    <div id="scratch-intuition" style="font-size:12.5px;color:var(--text-secondary);background:var(--bg-surface);padding:8px 12px;border-radius:6px;border:1px solid var(--border);line-height:1.5;"></div>
+                  </div>
+                  <div style="margin-bottom:10px;">
+                    <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">2. Active Falsification Probe (Devil's Advocate)</div>
+                    <div id="scratch-falsification" style="font-size:12.5px;color:var(--text-secondary);background:var(--bg-surface);padding:8px 12px;border-radius:6px;border:1px solid var(--border);line-height:1.5;"></div>
+                  </div>
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--emerald);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">3. Stream-of-Consciousness Notepad</div>
+                    <div id="scratch-stream" style="display:flex;flex-direction:column;gap:4px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);background:var(--bg-surface);padding:8px 12px;border-radius:6px;border:1px solid var(--border);"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 6: Human Cognitive vs Naive Search Contrast -->
+              <div class="accord-item" id="accord-contrast" style="display:none;">
+                <div class="accord-header">
+                  <span style="display:flex;align-items:center;gap:8px;">
+                    <span>⚖️</span>
+                    <strong style="color:var(--gold);">Sub-track 1C Diagnostic: Human Cognitive vs. Naïve Search</strong>
+                  </span>
+                  <span class="accord-arrow">▼</span>
+                </div>
+                <div class="accord-content">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div style="background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.25);border-radius:8px;padding:12px;">
+                      <div style="font-size:11.5px;font-weight:700;color:var(--rose);margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+                        <span>⚠️</span> <span>Standard Vector / BM25 Search:</span>
+                      </div>
+                      <div id="contrast-naive" style="font-size:12px;color:var(--text-secondary);line-height:1.55;"></div>
+                    </div>
+                    <div style="background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.25);border-radius:8px;padding:12px;">
+                      <div style="font-size:11.5px;font-weight:700;color:var(--emerald);margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+                        <span>🧠</span> <span>Human-Like Cognitive Search (Sub-track 1C):</span>
+                      </div>
+                      <div id="contrast-cognitive" style="font-size:12px;color:var(--text-secondary);line-height:1.55;"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1726,6 +1784,9 @@ async function executeResearch() {
   let streamedAnswer = '';
   let finalResultObj = null;
 
+  let activeSessionId = localStorage.getItem('ashen_session_id') || Math.random().toString(36).substring(2, 10);
+  localStorage.setItem('ashen_session_id', activeSessionId);
+
   try {
     let usedStreaming = false;
     let streamRes = null;
@@ -1733,7 +1794,7 @@ async function executeResearch() {
       streamRes = await fetch('/api/query/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: query, max_hops: 3, no_cache: false })
+        body: JSON.stringify({ question: query, max_hops: 3, no_cache: false, session_id: activeSessionId })
       });
       if (streamRes.ok) usedStreaming = true;
     } catch (e) {
@@ -1792,6 +1853,14 @@ async function executeResearch() {
               streamedAnswer += ev.data.token;
               answerBox.className = 'answer-text';
               answerBox.innerHTML = renderMarkdown(streamedAnswer);
+            } else if (ev.event === 'coreference_resolved') {
+              const cr = ev.data;
+              const ribbon = document.getElementById('coref-ribbon');
+              const text = document.getElementById('coref-text');
+              if (ribbon && text && cr.was_resolved) {
+                ribbon.style.display = 'flex';
+                text.innerHTML = '"' + esc(cr.original_query) + '" ➔ <strong style="color:var(--gold);">' + esc(cr.resolved_query) + '</strong> (Anchored to <em>' + esc(cr.anchor_entity) + '</em>)';
+              }
             } else if (ev.event === 'final_result') {
               finalResultObj = ev.data;
             }
@@ -1803,7 +1872,7 @@ async function executeResearch() {
       const syncRes = await fetch('/api/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: query, max_hops: 3, no_cache: false })
+        body: JSON.stringify({ question: query, max_hops: 3, no_cache: false, session_id: activeSessionId })
       });
       if (!syncRes.ok) throw new Error('HTTP ' + syncRes.status);
       finalResultObj = await syncRes.json();
@@ -1859,11 +1928,19 @@ function renderWorkspace(data) {
     bar.style.background = score >= 90 ? 'var(--emerald)' : score >= 70 ? 'var(--gold)' : 'var(--rose)';
   });
 
-  // Perspective Ribbon
+  // Perspective Ribbon (Hermeneutic Scepticism & Ideological Lens)
   const sp = data.source_perspective;
+  const sce = data.scepticism_index;
   const spStrip = document.getElementById('perspective-strip');
   if (spStrip) {
-    if (sp) {
+    if (sce) {
+      document.getElementById('perspective-label').textContent = sce.dominant_perspective;
+      const tierEl = document.getElementById('perspective-tier');
+      tierEl.textContent = sce.overall_scepticism_level.replace(/_/g, ' ');
+      tierEl.style.color = sce.overall_scepticism_level === 'LOW_SCEPTICISM' ? 'var(--emerald)' : sce.overall_scepticism_level === 'MODERATE_SCEPTICISM' ? 'var(--cyan)' : 'var(--gold)';
+      tierEl.style.background = sce.overall_scepticism_level === 'LOW_SCEPTICISM' ? 'var(--emerald-subtle)' : sce.overall_scepticism_level === 'MODERATE_SCEPTICISM' ? 'var(--cyan-subtle)' : 'var(--gold-subtle)';
+      spStrip.style.display = 'flex';
+    } else if (sp) {
       document.getElementById('perspective-label').textContent = sp.perspective_label + ' — ' + sp.governing_institution;
       document.getElementById('perspective-tier').textContent = sp.reliability_tier;
       spStrip.style.display = 'flex';
@@ -2010,6 +2087,58 @@ function renderWorkspace(data) {
       }
     } else {
       accordCritic.style.display = 'none';
+    }
+  }
+
+  // 5. Metacognitive Scratchpad & Inner Monologue
+  const scr = data.cognitive_scratchpad;
+  const accordMono = document.getElementById('accord-monologue');
+  if (accordMono) {
+    if (scr) {
+      accordMono.style.display = 'block';
+      hasAccordionItems = true;
+      const int = scr.pre_search_intuition || {};
+      document.getElementById('scratch-intuition').innerHTML =
+        '<strong>Hypothesis:</strong> ' + esc(int.initial_hypothesis || '') + '<br>' +
+        '<strong>Expected Type:</strong> ' + esc(int.expected_target_type || '') + '<br>' +
+        '<strong>Potential Trap:</strong> <span style="color:var(--rose);">' + esc(int.potential_epistemic_trap || '') + '</span>';
+
+      const fal = scr.falsification_probe || {};
+      document.getElementById('scratch-falsification').innerHTML =
+        '<strong>Devil\'s Advocate:</strong> ' + esc(fal.devil_advocate_question || '') + '<br>' +
+        '<strong>Defense:</strong> ' + esc(fal.curatorial_defense || '');
+
+      const stList = scr.internal_monologue_stream || [];
+      document.getElementById('scratch-stream').innerHTML = stList.map(s => '<div>' + esc(s) + '</div>').join('');
+    } else {
+      accordMono.style.display = 'none';
+    }
+  }
+
+  // 6. Human Cognitive vs Naive Search Contrast
+  const con = scr ? scr.naive_search_contrast : null;
+  const accordCon = document.getElementById('accord-contrast');
+  if (accordCon) {
+    if (con) {
+      accordCon.style.display = 'block';
+      hasAccordionItems = true;
+      document.getElementById('contrast-naive').innerHTML = esc(con.naive_vulnerability || '');
+      document.getElementById('contrast-cognitive').innerHTML = esc(con.human_cognitive_advantage || '');
+    } else {
+      accordCon.style.display = 'none';
+    }
+  }
+
+  // Coreference Ribbon
+  const corefRibbon = document.getElementById('coref-ribbon');
+  const corefText = document.getElementById('coref-text');
+  const coref = data.coreference_resolution;
+  if (corefRibbon && corefText) {
+    if (coref && coref.was_resolved) {
+      corefRibbon.style.display = 'flex';
+      corefText.innerHTML = '"' + esc(coref.original_query) + '" ➔ <strong style="color:var(--gold);">' + esc(coref.resolved_query) + '</strong> (Anchored to <em>' + esc(coref.anchor_entity) + '</em>)';
+    } else {
+      corefRibbon.style.display = 'none';
     }
   }
 

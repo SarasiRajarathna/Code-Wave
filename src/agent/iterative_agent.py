@@ -30,6 +30,9 @@ from agent.counter_evidence import CounterEvidenceProber
 from agent.epistemic import EpistemicCalibrator
 from agent.hypotheses import HypothesisBrancher
 from retrieval.pedigree import PedigreeScorer
+from agent.metacognition import MetacognitiveScratchpad
+from agent.conversation import ConversationManager
+from agent.provenance import HermeneuticScepticismEngine
 from llm.client import OpenRouterLLM, GROUNDING_SYSTEM_PROMPT
 from agent.rich_media import RichMediaResolver
 from utils.cache import SimpleDiskCache
@@ -71,6 +74,10 @@ class AgentResult:
     epistemic_calibration: Optional[Dict[str, Any]] = None
     hypotheses_branches: Optional[Dict[str, Any]] = None
     source_pedigree: Optional[Dict[str, Any]] = None
+    cognitive_scratchpad: Optional[Dict[str, Any]] = None
+    coreference_resolution: Optional[Dict[str, Any]] = None
+    scepticism_index: Optional[Dict[str, Any]] = None
+    session_id: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -109,6 +116,10 @@ class AgentResult:
             "epistemic_calibration": self.epistemic_calibration,
             "hypotheses_branches": self.hypotheses_branches,
             "source_pedigree": self.source_pedigree,
+            "cognitive_scratchpad": self.cognitive_scratchpad,
+            "coreference_resolution": self.coreference_resolution,
+            "scepticism_index": self.scepticism_index,
+            "session_id": self.session_id,
         }
 
 
@@ -139,8 +150,11 @@ class AshenIterativeAgent:
         self.epistemic_calibrator = EpistemicCalibrator()
         self.hypothesis_brancher = HypothesisBrancher()
         self.pedigree_scorer = PedigreeScorer()
+        self.scratchpad = MetacognitiveScratchpad(llm_client=self.llm)
+        self.conversation = ConversationManager()
+        self.provenance_engine = HermeneuticScepticismEngine()
 
-    def run(self, question: str, verbose: bool = True, no_cache: bool = False) -> AgentResult:
+    def run(self, question: str, verbose: bool = True, no_cache: bool = False, session_id: Optional[str] = None) -> AgentResult:
         """Execute human-like iterative search workflow for the user query."""
         if verbose:
             print(f"\n[Agent] Received Query: \"{question}\"")
@@ -173,6 +187,15 @@ class AshenIterativeAgent:
                 epistemic = cached_data.get("epistemic_calibration") or self.epistemic_calibrator.calibrate(question, cached_data["answer"], [])
                 hypotheses = cached_data.get("hypotheses_branches") or self.hypothesis_brancher.branch(question, cached_data["answer"], cached_data.get("contradictions", []), [])
                 source_pedigree = cached_data.get("source_pedigree") or self.pedigree_scorer.evaluate_sources(cached_data.get("citations", []))
+                scratchpad_data = cached_data.get("cognitive_scratchpad") or self.scratchpad.generate_monologue(
+                    question=question,
+                    hops=hops,
+                    accumulated_chunks=[],
+                    answer=cached_data["answer"],
+                    contradictions=cached_data.get("contradictions", []),
+                    proof_of_absence=cached_data.get("proof_of_absence")
+                )
+                scepticism = cached_data.get("scepticism_index") or self.provenance_engine.audit_sources(cached_data.get("citations", []), [])
 
                 return AgentResult(
                     question=question,
@@ -200,25 +223,35 @@ class AshenIterativeAgent:
                     resolved_aliases=resolved_aliases,
                     epistemic_calibration=epistemic,
                     hypotheses_branches=hypotheses,
-                    source_pedigree=source_pedigree
+                    source_pedigree=source_pedigree,
+                    cognitive_scratchpad=scratchpad_data,
+                    coreference_resolution=cached_data.get("coreference_resolution"),
+                    scepticism_index=scepticism,
+                    session_id=session_id
                 )
+
+        session_id = self.conversation.get_or_create_session(session_id)
+        coref_res = self.conversation.resolve_coreference(session_id, question)
+        effective_query = coref_res["resolved_query"] if coref_res["was_resolved"] else question
+        if verbose and coref_res["was_resolved"]:
+            print(f"[Agent] Coreference Disambiguated: '{question}' -> '{effective_query}' (Anchored to '{coref_res['anchor_entity']}')")
 
         seen_chunk_ids: Set[str] = set()
         accumulated_chunks: List[Dict[str, Any]] = []
         hops: List[SearchHop] = []
 
         # Cognitive Query Decomposition
-        decomposed = self.decomposer.decompose(question)
+        decomposed = self.decomposer.decompose(effective_query)
         if verbose and len(decomposed) > 1:
             print(f"[Agent] Decomposed compound query into {len(decomposed)} sub-queries:")
             for i, sq in enumerate(decomposed, 1):
                 print(f"        Step {i}: {sq}")
 
         # Extract Knowledge Graph relations & entity context
-        kg_context = self.kg.get_graph_context(question)
+        kg_context = self.kg.get_graph_context(effective_query)
         kg_triplets = kg_context.get("triplets", [])
 
-        current_query = decomposed[0] if decomposed else question
+        current_query = decomposed[0] if decomposed else effective_query
         is_sufficient = False
 
         for hop_idx in range(1, self.max_hops + 1):
@@ -329,6 +362,21 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
         hypotheses_branches = self.hypothesis_brancher.branch(question, answer, contradictions, accumulated_chunks)
         source_pedigree = self.pedigree_scorer.evaluate_sources(citations)
 
+        # 15. Metacognitive Scratchpad & Hermeneutic Scepticism Audit
+        cognitive_scratchpad = self.scratchpad.generate_monologue(
+            question=effective_query,
+            hops=hops,
+            accumulated_chunks=accumulated_chunks,
+            answer=answer,
+            contradictions=contradictions,
+            proof_of_absence=proof_of_absence,
+            kg_triplets=kg_triplets
+        )
+        scepticism_index = self.provenance_engine.audit_sources(citations, accumulated_chunks)
+
+        # Record conversation turn in memory
+        self.conversation.record_turn(session_id, question, answer, citations)
+
         result = AgentResult(
             question=question,
             answer=answer,
@@ -355,7 +403,11 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             resolved_aliases=resolved_aliases,
             epistemic_calibration=epistemic_calibration,
             hypotheses_branches=hypotheses_branches,
-            source_pedigree=source_pedigree
+            source_pedigree=source_pedigree,
+            cognitive_scratchpad=cognitive_scratchpad,
+            coreference_resolution=coref_res,
+            scepticism_index=scepticism_index,
+            session_id=session_id
         )
 
         # Only cache definitive answers, do not cache transient offline fallback notes
@@ -363,15 +415,25 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             self.cache.set(cache_key, result.to_dict())
         return result
 
-    def run_stream(self, question: str, no_cache: bool = False):
+    def run_stream(self, question: str, no_cache: bool = False, session_id: Optional[str] = None):
         """Execute human-like iterative search workflow and yield real-time SSE stream events."""
+        session_id = self.conversation.get_or_create_session(session_id)
+        coref_res = self.conversation.resolve_coreference(session_id, question)
+        effective_query = coref_res["resolved_query"] if coref_res["was_resolved"] else question
+
+        if coref_res["was_resolved"]:
+            yield {
+                "event": "coreference_resolved",
+                "data": coref_res
+            }
+
         yield {
             "event": "stage",
             "data": {"stage": "kg_expansion", "message": "Expanding query entities via Knowledge Graph..."}
         }
 
         # 1. Knowledge Graph Context
-        kg_context = self.kg.get_graph_context(question)
+        kg_context = self.kg.get_graph_context(effective_query)
         kg_triplets = kg_context.get("triplets", [])
         if kg_triplets:
             yield {
@@ -383,14 +445,14 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
         accumulated_chunks: List[Dict[str, Any]] = []
         hops: List[SearchHop] = []
 
-        decomposed = self.decomposer.decompose(question)
+        decomposed = self.decomposer.decompose(effective_query)
         if len(decomposed) > 1:
             yield {
                 "event": "sub_queries",
                 "data": {"decomposed": decomposed}
             }
 
-        current_query = decomposed[0] if decomposed else question
+        current_query = decomposed[0] if decomposed else effective_query
         is_sufficient = False
 
         # 2. Multi-Hop Traversal Loop
@@ -553,6 +615,29 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             "data": source_pedigree
         }
 
+        # 15. Metacognitive Scratchpad & Hermeneutic Scepticism Audit
+        cognitive_scratchpad = self.scratchpad.generate_monologue(
+            question=effective_query,
+            hops=hops,
+            accumulated_chunks=accumulated_chunks,
+            answer=answer,
+            contradictions=contradictions,
+            proof_of_absence=proof_of_absence,
+            kg_triplets=kg_triplets
+        )
+        yield {
+            "event": "metacognition",
+            "data": cognitive_scratchpad
+        }
+
+        scepticism_index = self.provenance_engine.audit_sources(citations, accumulated_chunks)
+        yield {
+            "event": "scepticism_audit",
+            "data": scepticism_index
+        }
+
+        self.conversation.record_turn(session_id, question, answer, citations)
+
         result = AgentResult(
             question=question,
             answer=answer,
@@ -579,7 +664,11 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             resolved_aliases=resolved_aliases,
             epistemic_calibration=epistemic_calibration,
             hypotheses_branches=hypotheses_branches,
-            source_pedigree=source_pedigree
+            source_pedigree=source_pedigree,
+            cognitive_scratchpad=cognitive_scratchpad,
+            coreference_resolution=coref_res,
+            scepticism_index=scepticism_index,
+            session_id=session_id
         )
 
         yield {

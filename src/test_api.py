@@ -64,12 +64,16 @@ def test_fastapi_endpoints():
     assert r.status_code == 200, f"Failed: {r.text}"
     resp = r.json()
     assert "3,695" in resp["answer"] or resp["grounding_score"] >= 0.8
+    assert resp.get("cognitive_scratchpad") is not None, "Missing cognitive_scratchpad in response"
+    assert resp.get("scepticism_index") is not None, "Missing scepticism_index in response"
     print(f"  [PASS] Query response received:")
     print(f"         Grounding Status : {resp['grounding_status']}")
     print(f"         Grounding Score  : {resp['grounding_score'] * 100:.1f}%")
     print(f"         Citations Count  : {len(resp['citations'])}")
     print(f"         Rich Media Image : {resp['rich_media']['image_url'] if resp['rich_media'] else 'None'}")
     print(f"         Reasoning Graph  : {'Present' if resp['reasoning_graph'] else 'None'}")
+    print(f"         Scratchpad Monologue: Present ({len(resp['cognitive_scratchpad'].get('internal_monologue_stream', []))} thoughts)")
+    print(f"         Scepticism Lens : {resp['scepticism_index'].get('dominant_perspective')}")
 
     print("\n[TEST API 6/6] Testing POST /api/query/stream (Server-Sent Events) ...")
     r_stream = client.post("/api/query/stream", json={"question": "Where is Greyfell Citadel located?", "max_hops": 1})
@@ -94,7 +98,18 @@ def test_fastapi_endpoints():
     assert final_result_found, "final_result event not found in stream"
     print(f"  [PASS] Stream verified: {events_found} total events, {tokens_found} streamed tokens, final_result received.")
 
-    print("\n[TEST API 7/7] Testing POST /api/benchmark/run (Automated Evaluation Suite) ...")
+    print("\n[TEST API 7/8] Testing Multi-Turn Dialogue & Coreference Resolution ...")
+    test_sid = "test_dialogue_session"
+    r_turn1 = client.post("/api/query", json={"question": "Who was the ruler of the Shattered Vale when Greyfell Citadel was constructed?", "session_id": test_sid})
+    assert r_turn1.status_code == 200
+    r_turn2 = client.post("/api/query", json={"question": "What happened to him during the war?", "session_id": test_sid})
+    assert r_turn2.status_code == 200
+    resp_turn2 = r_turn2.json()
+    coref = resp_turn2.get("coreference_resolution")
+    assert coref is not None and coref.get("was_resolved"), f"Expected coreference resolution, got: {coref}"
+    print(f"  [PASS] Multi-turn resolved: '{coref['original_query']}' -> '{coref['resolved_query']}' (Anchored to '{coref['anchor_entity']}')")
+
+    print("\n[TEST API 8/8] Testing POST /api/benchmark/run (Automated Evaluation Suite) ...")
     r_bm = client.post("/api/benchmark/run")
     assert r_bm.status_code == 200, f"Benchmark failed: {r_bm.text}"
     bm_data = r_bm.json()

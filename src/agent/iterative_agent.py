@@ -27,6 +27,9 @@ from retrieval.anachronism import AnachronismChecker
 from agent.proof_of_absence import ProofOfAbsenceEngine
 from agent.critic import ArchivistCritic
 from agent.counter_evidence import CounterEvidenceProber
+from agent.epistemic import EpistemicCalibrator
+from agent.hypotheses import HypothesisBrancher
+from retrieval.pedigree import PedigreeScorer
 from llm.client import OpenRouterLLM, GROUNDING_SYSTEM_PROMPT
 from agent.rich_media import RichMediaResolver
 from utils.cache import SimpleDiskCache
@@ -65,6 +68,9 @@ class AgentResult:
     anachronism: Optional[Dict[str, Any]] = None
     counter_evidence: Optional[Dict[str, Any]] = None
     resolved_aliases: List[str] = field(default_factory=list)
+    epistemic_calibration: Optional[Dict[str, Any]] = None
+    hypotheses_branches: Optional[Dict[str, Any]] = None
+    source_pedigree: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -100,6 +106,9 @@ class AgentResult:
             "anachronism": self.anachronism,
             "counter_evidence": self.counter_evidence,
             "resolved_aliases": self.resolved_aliases,
+            "epistemic_calibration": self.epistemic_calibration,
+            "hypotheses_branches": self.hypotheses_branches,
+            "source_pedigree": self.source_pedigree,
         }
 
 
@@ -127,6 +136,9 @@ class AshenIterativeAgent:
         self.corroboration_matrix = CorroborationMatrix()
         self.anachronism_checker = AnachronismChecker()
         self.counter_prober = CounterEvidenceProber()
+        self.epistemic_calibrator = EpistemicCalibrator()
+        self.hypothesis_brancher = HypothesisBrancher()
+        self.pedigree_scorer = PedigreeScorer()
 
     def run(self, question: str, verbose: bool = True, no_cache: bool = False) -> AgentResult:
         """Execute human-like iterative search workflow for the user query."""
@@ -158,6 +170,9 @@ class AshenIterativeAgent:
                 anachronism = cached_data.get("anachronism") or self.anachronism_checker.check_coherence(question, cached_data["answer"], cached_data.get("timeline_events", []))
                 counter_evidence = cached_data.get("counter_evidence") or self.counter_prober.probe(question, cached_data["answer"], [])
                 resolved_aliases = cached_data.get("resolved_aliases", [])
+                epistemic = cached_data.get("epistemic_calibration") or self.epistemic_calibrator.calibrate(question, cached_data["answer"], [])
+                hypotheses = cached_data.get("hypotheses_branches") or self.hypothesis_brancher.branch(question, cached_data["answer"], cached_data.get("contradictions", []), [])
+                source_pedigree = cached_data.get("source_pedigree") or self.pedigree_scorer.evaluate_sources(cached_data.get("citations", []))
 
                 return AgentResult(
                     question=question,
@@ -182,7 +197,10 @@ class AshenIterativeAgent:
                     corroboration=corroboration,
                     anachronism=anachronism,
                     counter_evidence=counter_evidence,
-                    resolved_aliases=resolved_aliases
+                    resolved_aliases=resolved_aliases,
+                    epistemic_calibration=epistemic,
+                    hypotheses_branches=hypotheses,
+                    source_pedigree=source_pedigree
                 )
 
         seen_chunk_ids: Set[str] = set()
@@ -306,6 +324,11 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
         counter_evidence = self.counter_prober.probe(question, answer, accumulated_chunks)
         resolved_aliases = self.alias_resolver.get_known_aliases(question)
 
+        # 14. Epistemic Calibration, Hypothesis Branching & Source Pedigree Scorer
+        epistemic_calibration = self.epistemic_calibrator.calibrate(question, answer, accumulated_chunks)
+        hypotheses_branches = self.hypothesis_brancher.branch(question, answer, contradictions, accumulated_chunks)
+        source_pedigree = self.pedigree_scorer.evaluate_sources(citations)
+
         result = AgentResult(
             question=question,
             answer=answer,
@@ -329,7 +352,10 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             corroboration=corroboration,
             anachronism=anachronism,
             counter_evidence=counter_evidence,
-            resolved_aliases=resolved_aliases
+            resolved_aliases=resolved_aliases,
+            epistemic_calibration=epistemic_calibration,
+            hypotheses_branches=hypotheses_branches,
+            source_pedigree=source_pedigree
         )
 
         # Only cache definitive answers, do not cache transient offline fallback notes
@@ -508,6 +534,25 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
 
         resolved_aliases = self.alias_resolver.get_known_aliases(question)
 
+        epistemic_calibration = self.epistemic_calibrator.calibrate(question, answer, accumulated_chunks)
+        yield {
+            "event": "epistemic_calibration",
+            "data": epistemic_calibration
+        }
+
+        hypotheses_branches = self.hypothesis_brancher.branch(question, answer, contradictions, accumulated_chunks)
+        if hypotheses_branches:
+            yield {
+                "event": "hypotheses_branches",
+                "data": hypotheses_branches
+            }
+
+        source_pedigree = self.pedigree_scorer.evaluate_sources(citations)
+        yield {
+            "event": "source_pedigree",
+            "data": source_pedigree
+        }
+
         result = AgentResult(
             question=question,
             answer=answer,
@@ -531,7 +576,10 @@ Include specific numbers, names, and dates where applicable. Cite the sources.""
             corroboration=corroboration,
             anachronism=anachronism,
             counter_evidence=counter_evidence,
-            resolved_aliases=resolved_aliases
+            resolved_aliases=resolved_aliases,
+            epistemic_calibration=epistemic_calibration,
+            hypotheses_branches=hypotheses_branches,
+            source_pedigree=source_pedigree
         )
 
         yield {

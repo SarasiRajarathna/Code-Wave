@@ -282,6 +282,7 @@
             </div>
             <div class="stat-pill"><span>&#10004; Facts:</span><strong id="stat-facts" style="color:var(--emerald)">&mdash;</strong></div>
             <div class="stat-pill"><span>&#128218; Consensus:</span><strong id="stat-corroboration" style="color:var(--cyan)">&mdash;</strong></div>
+            <div class="stat-pill"><span>&#128302; Modality:</span><strong id="stat-epistemic" style="color:var(--gold-light)">&mdash;</strong></div>
             <div class="stat-pill"><span>Hallucination Risk:</span><strong style="color:var(--emerald)">0.0%</strong></div>
           </div>
         </div>
@@ -303,6 +304,26 @@
             <div id="conflict-box" class="conflict-box">
               <div class="conflict-title">&#9888;&#65039; Archival Contradiction Detected &amp; Resolved</div>
               <div id="conflict-body" class="conflict-body"></div>
+            </div>
+            <div id="hypotheses-box" style="display:none;margin-bottom:14px;background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.35);border-radius:12px;padding:14px 16px;flex-direction:column;gap:10px;">
+              <div style="font-weight:800;color:#d8b4fe;font-size:13px;display:flex;align-items:center;justify-content:space-between;">
+                <span>&#9878;&#65039; Multi-Hypothesis Historical Branching</span>
+                <span id="hyp-topic-badge" style="font-family:'JetBrains Mono',monospace;font-size:10px;background:rgba(192,132,252,.15);border:1px solid var(--purple);color:var(--purple);padding:2px 7px;border-radius:4px;">DIVERGENT_TRADITIONS</span>
+              </div>
+              <div id="hyp-topic-name" style="font-size:12.5px;color:#f1f5f9;font-weight:700;"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="hyp-branches-grid">
+                <div style="background:rgba(10,16,28,.8);border:1px solid rgba(230,167,60,.25);border-radius:8px;padding:10px;">
+                  <div style="font-size:11px;font-weight:700;color:var(--gold-light);margin-bottom:4px;" id="hyp-a-label">Hypothesis A (Official Orthodoxy)</div>
+                  <div style="font-size:12px;color:#cbd5e1;line-height:1.5;" id="hyp-a-claim"></div>
+                  <div style="font-size:10.5px;color:var(--text-faint);margin-top:6px;font-family:'JetBrains Mono',monospace;" id="hyp-a-auth"></div>
+                </div>
+                <div style="background:rgba(10,16,28,.8);border:1px solid rgba(192,132,252,.25);border-radius:8px;padding:10px;">
+                  <div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:4px;" id="hyp-b-label">Hypothesis B (Antiquarian Dissent)</div>
+                  <div style="font-size:12px;color:#cbd5e1;line-height:1.5;" id="hyp-b-claim"></div>
+                  <div style="font-size:10.5px;color:var(--text-faint);margin-top:6px;font-family:'JetBrains Mono',monospace;" id="hyp-b-auth"></div>
+                </div>
+              </div>
+              <div style="font-size:11.5px;color:var(--text-muted);font-style:italic;border-top:1px solid rgba(192,132,252,.2);padding-top:8px;" id="hyp-reconciliation"></div>
             </div>
             <div id="proof-absence-box" style="display:none;margin-bottom:14px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.35);border-radius:12px;padding:14px 16px;flex-direction:column;gap:8px;">
               <div style="font-weight:800;color:#6ee7b7;font-size:13px;display:flex;align-items:center;gap:8px;">
@@ -355,6 +376,7 @@
                 <div class="metric-row"><span class="metric-label">Search Strategy</span><span class="metric-value gold">Hybrid RRF + Rerank</span></div>
                 <div class="metric-row"><span class="metric-label">Traversal Depth</span><span class="metric-value cyan" id="m-hops">&mdash;</span></div>
                 <div class="metric-row"><span class="metric-label">Sources Cited</span><span class="metric-value emerald" id="m-sources">&mdash;</span></div>
+                <div class="metric-row"><span class="metric-label">Archival Pedigree</span><span class="metric-value cyan" id="m-pedigree">&mdash;</span></div>
                 <div class="metric-row"><span class="metric-label">KG Triples Injected</span><span class="metric-value purple" id="m-triples">&mdash;</span></div>
                 <div class="metric-row"><span class="metric-label">Chunks Indexed</span><span class="metric-value gold" id="m-chunks">1,737</span></div>
               </div>
@@ -716,6 +738,45 @@ function renderWorkspace(data){
     }
   }
 
+  const ep=data.epistemic_calibration;
+  const epStat=document.getElementById('stat-epistemic');
+  if(epStat){
+    if(ep){
+      epStat.textContent=ep.certainty_level.replace(/_/g,' ')+' ('+(ep.epistemic_certainty_score*100).toFixed(0)+'%)';
+      epStat.style.color=ep.certainty_level==='CATEGORICAL_CERTAINTY'?'var(--gold-light)':ep.certainty_level==='PROBABLE_HISTORICAL_CONSENSUS'?'var(--cyan)':'var(--amber)';
+    }else{
+      epStat.textContent='--';
+    }
+  }
+
+  const hyp=data.hypotheses_branches;
+  const hypBox=document.getElementById('hypotheses-box');
+  if(hypBox){
+    if(hyp&&hyp.controversy_topic){
+      hypBox.style.display='flex';
+      document.getElementById('hyp-topic-name').textContent='Controversy: '+hyp.controversy_topic;
+      document.getElementById('hyp-a-label').textContent=hyp.hypothesis_a.label;
+      document.getElementById('hyp-a-claim').textContent=hyp.hypothesis_a.claim;
+      document.getElementById('hyp-a-auth').textContent='Authority: '+hyp.hypothesis_a.authority;
+      document.getElementById('hyp-b-label').textContent=hyp.hypothesis_b.label;
+      document.getElementById('hyp-b-claim').textContent=hyp.hypothesis_b.claim;
+      document.getElementById('hyp-b-auth').textContent='Authority: '+hyp.hypothesis_b.authority;
+      document.getElementById('hyp-reconciliation').innerHTML='<strong>Archival Reconciliation:</strong> '+esc(hyp.curatorial_synthesis);
+    }else{
+      hypBox.style.display='none';
+    }
+  }
+
+  const ped=data.source_pedigree;
+  const pedMetric=document.getElementById('m-pedigree');
+  if(pedMetric){
+    if(ped&&ped.composite_integrity_score){
+      pedMetric.textContent=(ped.composite_integrity_score*100).toFixed(0)+'% Integrity';
+    }else{
+      pedMetric.textContent='--';
+    }
+  }
+
   const leads=data.investigation_leads||[];
   const leadsSec=document.getElementById('leads-section');
   const leadsGrid=document.getElementById('leads-grid');
@@ -809,10 +870,16 @@ function renderWorkspace(data){
   const cntE=document.getElementById('cnt-evidence');cntE.textContent=total;cntE.classList.toggle('show',total>0);
   document.getElementById('evidence-count-pill').textContent=total+' Citation'+(total!==1?'s':'');
   evidenceGrid.innerHTML='';
+  const pedMap={};
+  if(data.source_pedigree&&data.source_pedigree.pedigrees){
+    data.source_pedigree.pedigrees.forEach(p=>{pedMap[p.source]=p;});
+  }
   (cits.length>0?cits:fall.map(c=>({source:c}))).forEach(p=>{
     const type=srcType(p.source),div=document.createElement('div');
     div.className='evidence-card '+type;
-    div.innerHTML='<div class="evidence-src"><span class="evidence-src-name">'+esc(p.source)+'</span><span class="ev-type-tag '+type+'">'+type.toUpperCase()+'</span></div>'+(p.quote?'<div class="evidence-quote">'+esc(p.quote)+'</div>':'');
+    const pInfo=pedMap[p.source];
+    const pedBadge=pInfo?'<span style="font-size:9.5px;font-family:\'JetBrains Mono\',monospace;color:var(--gold-light);background:rgba(230,167,60,.12);border:1px solid rgba(230,167,60,.25);padding:1px 5px;border-radius:4px;">'+(pInfo.integrity_score*100).toFixed(0)+'% Integrity</span>':'';
+    div.innerHTML='<div class="evidence-src"><span class="evidence-src-name">'+esc(p.source)+'</span> '+pedBadge+'<span class="ev-type-tag '+type+'">'+type.toUpperCase()+'</span></div>'+(p.quote?'<div class="evidence-quote">'+esc(p.quote)+'</div>':'');
     evidenceGrid.appendChild(div);
   });
   queryActiveIds.clear();(data.kg_triplets||[]).forEach(t=>{queryActiveIds.add(t.subject);queryActiveIds.add(t.object);});

@@ -17,10 +17,16 @@ from api import app
 def test_fastapi_endpoints():
     client = TestClient(app)
 
-    print("\n[TEST API 1/5] Testing GET / ...")
-    r = client.get("/")
+    print("\n[TEST API 1/6] Testing GET /app (Dark-Fantasy Web Explorer) ...")
+    r = client.get("/app")
     assert r.status_code == 200, f"Failed: {r.text}"
-    print(f"  [PASS] Root endpoint: {r.json()['project']} ({r.json()['status']})")
+    assert "ASHEN ERA ARCHIVE" in r.text, "Title not found in HTML"
+    print("  [PASS] Web Explorer HTML served successfully.")
+
+    print("\n[TEST API 2/6] Testing GET / (Redirect) ...")
+    r_root = client.get("/", follow_redirects=True)
+    assert r_root.status_code == 200
+    print("  [PASS] Root redirect to /app validated.")
 
     print("\n[TEST API 2/5] Testing GET /api/health ...")
     r = client.get("/api/health")

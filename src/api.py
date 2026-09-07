@@ -19,7 +19,7 @@ if str(src_dir) not in sys.path:
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
 from ingest.embeddings import get_embedding_model
@@ -123,11 +123,28 @@ CURATED_SAMPLES = [
 
 @app.get("/", tags=["General"])
 def root():
+    """Redirect to interactive Dark-Fantasy Web Explorer."""
+    return RedirectResponse(url="/app")
+
+
+@app.get("/app", response_class=HTMLResponse, tags=["Web Explorer"])
+def web_explorer():
+    """Serve the dark-fantasy interactive Web Explorer interface."""
+    html_path = Path(__file__).resolve().parent / "web" / "index.html"
+    if html_path.exists():
+        with open(html_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>Ashen Era Archive UI not found.</h1>", status_code=404)
+
+
+@app.get("/api", tags=["General"])
+def api_info():
     return {
         "project": "Code-Wave AI Backend",
         "competition": "SLIIT Codefest 2026",
         "track": "Sub-track 1C: Searching the Way a Human Does",
         "status": "Operational",
+        "app_url": "/app",
         "docs_url": "/docs",
         "api_endpoints": {
             "query": "POST /api/query",

@@ -18,8 +18,10 @@ here we're OCRing a small graphic embedded within an otherwise-normal
 text page.
 """
 
+import json
 import io
 import re
+from pathlib import Path
 import pymupdf as fitz
 import pytesseract
 from PIL import Image
@@ -34,6 +36,71 @@ if Path(_custom_tess).exists():
     pytesseract.pytesseract.tesseract_cmd = _custom_tess
 elif shutil.which("tesseract"):
     pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
+
+
+def load_plate_overrides(overrides_path: str | Path | None = None) -> dict:
+    """Loads manual plate overrides from JSON file if present.
+    Returns a dict mapping (file_key, page_number) -> override_dict.
+    Supports both nested dict format and list of dicts format.
+    """
+    if overrides_path is None:
+        repo_root = Path(__file__).resolve().parents[3]
+        candidates = [
+            repo_root / "data" / "plate_overrides.json",
+            repo_root / "data" / "extracted" / "plate_overrides.json",
+        ]
+        for c in candidates:
+            if c.exists():
+                overrides_path = c
+                break
+
+    if not overrides_path or not Path(overrides_path).exists():
+        return {}
+
+    try:
+        with open(overrides_path, "r", encoding="utf-8") as f:
+            raw_data = json.load(f)
+    except Exception as e:
+        print(f"  Warning: Failed to read plate overrides from {overrides_path}: {e}")
+        return {}
+
+    normalized = {}
+
+    def _add_entry(source_key: str, page: int | str, data: dict):
+        try:
+            p_num = int(page)
+        except (ValueError, TypeError):
+            return
+        key_name = Path(source_key).name.lower()
+        key_stem = Path(source_key).stem.lower()
+        normalized[(key_name, p_num)] = data
+        normalized[(key_stem, p_num)] = data
+
+    if isinstance(raw_data, dict):
+        for file_key, pages_map in raw_data.items():
+            if file_key.startswith("_"):  # skip comments
+                continue
+            if isinstance(pages_map, dict):
+                for p_str, override_info in pages_map.items():
+                    if isinstance(override_info, dict):
+                        _add_entry(file_key, p_str, override_info)
+    elif isinstance(raw_data, list):
+        for item in raw_data:
+            if isinstance(item, dict) and "source_file" in item and "page" in item:
+                _add_entry(item["source_file"], item["page"], item)
+
+    return normalized
+
+
+def get_override_for_page(overrides: dict, source_file: str, page_num: int) -> dict | None:
+    if not overrides:
+        return None
+    s_path = Path(source_file)
+    name_key = (s_path.name.lower(), page_num)
+    stem_key = (s_path.stem.lower(), page_num)
+    full_key = (str(source_file).lower(), page_num)
+    return overrides.get(name_key) or overrides.get(stem_key) or overrides.get(full_key)
+
 
 def extract_plate_text(pdf_path: str) -> list[dict]:
     """For every page in the PDF that has an embedded image, run OCR on
@@ -109,12 +176,18 @@ def extract_plate_text(pdf_path: str) -> list[dict]:
     return results
 
 
-def merge_plates_into_pages(pages: list[dict], plates: list[dict]) -> list[dict]:
+def merge_plates_into_pages(pages: list[dict], plates: list[dict], overrides: dict | None = None) -> list[dict]:
     """Takes the normal page dicts from loaders.load_pdf() and the OCR'd
     plate results from extract_plate_text(), and merges the plate text
     into the matching page's text -- so downstream chunking/embedding
     sees the plate's numbers as part of that page's content, not lost.
+
+    If manual overrides are present in data/plate_overrides.json (or passed in),
+    they override the OCR output and review flags for specified pages.
     """
+    if overrides is None:
+        overrides = load_plate_overrides()
+
     plates_by_page = {}
     for p in plates:
         plates_by_page.setdefault(p["page"], []).append(p)
@@ -122,8 +195,30 @@ def merge_plates_into_pages(pages: list[dict], plates: list[dict]) -> list[dict]
     merged = []
     for page in pages:
         page = dict(page)
-        page_plates = plates_by_page.get(page["page"], [])
-        if page_plates:
+        page_num = page.get("page")
+        source_file = page.get("source_file", "")
+
+        override = get_override_for_page(overrides, source_file, page_num)
+        page_plates = plates_by_page.get(page_num, [])
+
+        if override:
+            plate_text = override.get("plate_text") or override.get("text")
+            needs_review = override.get("plate_needs_review", override.get("low_confidence", False))
+
+            if plate_text:
+                plate_block = "\n\n[FIGURE PLATE TEXT]\n" + plate_text
+                page["text"] = page["text"] + plate_block
+                page["has_plate"] = True
+                page["plate_needs_review"] = needs_review
+            elif page_plates:
+                plate_block = "\n\n[FIGURE PLATE TEXT]\n" + "\n---\n".join(p["plate_text"] for p in page_plates)
+                page["text"] = page["text"] + plate_block
+                page["has_plate"] = True
+                page["plate_needs_review"] = needs_review
+            else:
+                page["has_plate"] = False
+                page["plate_needs_review"] = False
+        elif page_plates:
             plate_block = "\n\n[FIGURE PLATE TEXT]\n" + "\n---\n".join(p["plate_text"] for p in page_plates)
             page["text"] = page["text"] + plate_block
             page["has_plate"] = True
@@ -131,6 +226,8 @@ def merge_plates_into_pages(pages: list[dict], plates: list[dict]) -> list[dict]
         else:
             page["has_plate"] = False
             page["plate_needs_review"] = False
+
         merged.append(page)
 
     return merged
+

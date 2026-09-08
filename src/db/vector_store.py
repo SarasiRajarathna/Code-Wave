@@ -13,8 +13,13 @@ from chromadb.config import Settings
 
 class AshenVectorStore:
     """Vector database interface wrapping ChromaDB."""
-    def __init__(self, persist_directory: str = "data/vector_store", collection_name: str = "ashen_era_archive"):
-        self.persist_directory = Path(persist_directory)
+    def __init__(self, persist_directory: Optional[str] = None, collection_name: str = "ashen_era_archive"):
+        if persist_directory is not None:
+            self.persist_directory = Path(persist_directory)
+        else:
+            base_dir = Path(__file__).resolve().parent.parent.parent
+            self.persist_directory = base_dir / "data" / "vector_store"
+        
         self.persist_directory.mkdir(parents=True, exist_ok=True)
         self.collection_name = collection_name
 

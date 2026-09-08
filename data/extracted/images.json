@@ -1,7 +1,7 @@
 [
   {
     "text": "Image Plate: Plate 00 Location Marrowwatch\n\n[OCR EXTRACTED TEXT]\nMarrowwatch\n\nRECORDED GARRISON STRENGTH\n\n3,107\n\nsouls under arms\n\nAs entered into the Codex Vaeloria. Figures verified by the Silent Choir.",
-    "source_file": "data\\corpus\\images\\plate_00_location_marrowwatch.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_00_location_marrowwatch.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 00 Location Marrowwatch",
@@ -9,7 +9,7 @@
   },
   {
     "text": "Image Plate: Plate 01 Location Emberdeep\n\n[OCR EXTRACTED TEXT]\nEmberdeep - Recorded Garrison Strength\n\nOld Imperial minimum\n\nBorder-march standard\n\nGreat Keep standard\n\nEmberdeep\n\nMeasured in souls under arms.",
-    "source_file": "data\\corpus\\images\\plate_01_location_emberdeep.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_01_location_emberdeep.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 01 Location Emberdeep",
@@ -17,7 +17,7 @@
   },
   {
     "text": "Image Plate: Plate 02 Conflict The Accord Of Mournthrone\n\n[OCR EXTRACTED TEXT]\nThe Accord of Mournthrone\n\nRECORDED CASUALTIES\n\n67,349\n\n104,818\n\nsouls lost",
-    "source_file": "data\\corpus\\images\\plate_02_conflict_the_accord_of_mournthrone.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_02_conflict_the_accord_of_mournthrone.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 02 Conflict The Accord Of Mournthrone",
@@ -25,7 +25,7 @@
   },
   {
     "text": "Image Plate: Plate 03 Location Crookgate Keep\n\n[OCR EXTRACTED TEXT]\nCrookgate Keep\n\nRECORDED GARRISON STRENGTH\n\n6,970\n\nsouls under arms\n\nAs entered into the Codex Vaeloria. Figures verified by the Silent Choir.",
-    "source_file": "data\\corpus\\images\\plate_03_location_crookgate_keep.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_03_location_crookgate_keep.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 03 Location Crookgate Keep",
@@ -33,7 +33,7 @@
   },
   {
     "text": "Image Plate: Plate 04 Artifact The Thrice Bound Edge\n\n[OCR EXTRACTED TEXT]\nThe Thrice-Bound Edge - Attunement Cost\n\n20\n\nNovice tolerance\n\nAdept tolerance\n\nMaster tolerance\n\nThe Thrice-Bound Edge\n\nMeasured in vitae-grains.",
-    "source_file": "data\\corpus\\images\\plate_04_artifact_the_thrice_bound_edge.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_04_artifact_the_thrice_bound_edge.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 04 Artifact The Thrice Bound Edge",
@@ -41,7 +41,7 @@
   },
   {
     "text": "Image Plate: Plate 05 Location Embercrag Fortress\n\n[OCR EXTRACTED TEXT]\nEmbercrag Fortress\n\nRECORDED GARRISON STRENGTH\n\n7,473\n\nsouls under arms",
-    "source_file": "data\\corpus\\images\\plate_05_location_embercrag_fortress.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_05_location_embercrag_fortress.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 05 Location Embercrag Fortress",
@@ -49,7 +49,7 @@
   },
   {
     "text": "Image Plate: Plate 06 Location Hollowreach\n\n[OCR EXTRACTED TEXT]\nHollowreach\n\nRECORDED GARRISON STRENGTH\n\n1,306\n\nsouls under arms\n\nAs entered into the Codex Vaeloria. Figures verified by the Silent Choir.",
-    "source_file": "data\\corpus\\images\\plate_06_location_hollowreach.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_06_location_hollowreach.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 06 Location Hollowreach",
@@ -57,7 +57,7 @@
   },
   {
     "text": "Image Plate: Plate 07 Artifact The Thrice Bound Lantern\n\n[OCR EXTRACTED TEXT]\nhe Thrice-Bound Lantern - Attunement Cos\n\n20\n\nNovice tolerance\n\nAdept tolerance\n\nMaster tolerance\n\n55\n\nThe Thrice-Bound Lantern\n\nMeasured in vitae-grains.",
-    "source_file": "data\\corpus\\images\\plate_07_artifact_the_thrice_bound_lantern.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_07_artifact_the_thrice_bound_lantern.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 07 Artifact The Thrice Bound Lantern",
@@ -65,7 +65,7 @@
   },
   {
     "text": "Image Plate: Plate 08 Creature Weeping Lurker\n\n[OCR EXTRACTED TEXT]\nWeeping Lurker\n\nTHREAT RATING\n\nof 10, per the Vanguard scale",
-    "source_file": "data\\corpus\\images\\plate_08_creature_weeping_lurker.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_08_creature_weeping_lurker.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 08 Creature Weeping Lurker",
@@ -73,7 +73,7 @@
   },
   {
     "text": "Image Plate: Plate 09 Location Greyfell Citadel\n\n[OCR EXTRACTED TEXT]\nGreyfell Citadel\n\nRECORDED GARRISON STRENGTH\n\n3,695\n\nsouls under arms\n\nAs entered into the Codex Vaeloria. Figures verified by the Silent Choir.",
-    "source_file": "data\\corpus\\images\\plate_09_location_greyfell_citadel.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_09_location_greyfell_citadel.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 09 Location Greyfell Citadel",
@@ -81,7 +81,7 @@
   },
   {
     "text": "Image Plate: Plate 10 Creature Marsh Revenant\n\n[OCR EXTRACTED TEXT]\nMarsh Revenant - Threat Rating\n\nMarsh Revenant\n\nMeasured in of 10, per the Vanguard scale.",
-    "source_file": "data\\corpus\\images\\plate_10_creature_marsh_revenant.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_10_creature_marsh_revenant.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 10 Creature Marsh Revenant",
@@ -89,7 +89,7 @@
   },
   {
     "text": "Image Plate: Plate 11 Location Mournwatch\n\n[OCR EXTRACTED TEXT]\nMournwatch\n\nRECORDED GARRISON STRENGTH\n\n6,254\n\nsouls under arms",
-    "source_file": "data\\corpus\\images\\plate_11_location_mournwatch.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_11_location_mournwatch.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 11 Location Mournwatch",
@@ -97,7 +97,7 @@
   },
   {
     "text": "Image Plate: Plate 12 Location Thorncairn\n\n[OCR EXTRACTED TEXT]\nThorncairn\n\nRECORDED GARRISON STRENGTH\n\n7,748\n\nsouls under arms\n\nAs entered into the Codex Vaeloria. Figures verified by the Silent Choir.",
-    "source_file": "data\\corpus\\images\\plate_12_location_thorncairn.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_12_location_thorncairn.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 12 Location Thorncairn",
@@ -105,7 +105,7 @@
   },
   {
     "text": "Image Plate: Plate 13 Artifact The Cinder Wrought Aegis\n\n[OCR EXTRACTED TEXT]\nhe Cinder-Wrought Aegis - Attunement Cos\n\n20\n\nNovice tolerance\n\nAdept tolerance\n\nMaster tolerance\n\n34\n\nThe Cinder-Wrought Aegis\n\nMeasured in vitae-grains.",
-    "source_file": "data\\corpus\\images\\plate_13_artifact_the_cinder_wrought_aegis.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_13_artifact_the_cinder_wrought_aegis.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 13 Artifact The Cinder Wrought Aegis",
@@ -113,7 +113,7 @@
   },
   {
     "text": "Image Plate: Plate 14 Creature Thorn Wraith\n\n[OCR EXTRACTED TEXT]\nThorn Wraith\n\nTHREAT RATING\n\n9\n\nof 10, per the Vanguard scale",
-    "source_file": "data\\corpus\\images\\plate_14_creature_thorn_wraith.png",
+    "source_file": "C:\\Users\\Acer\\Documents\\GitHub\\Code-Wave\\data\\corpus\\images\\plate_14_creature_thorn_wraith.png",
     "source_type": "images",
     "page": null,
     "title": "Plate 14 Creature Thorn Wraith",

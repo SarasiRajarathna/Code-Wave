@@ -1,4 +1,6 @@
-path = r'c:\Users\sahil kavishka\Downloads\Code-Wave\Code-Wave\src\web\index.html'
+from pathlib import Path
+
+path = Path(__file__).resolve().parent.parent / "src" / "web" / "index.html"
 
 js_block = r"""
 <script>

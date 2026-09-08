@@ -12,8 +12,15 @@ import pytesseract
 from PIL import Image
 import io
 
-# Set default Tesseract binary path on Windows
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+import os
+import shutil
+
+# Robust Tesseract binary path discovery (Windows default, env var, or system PATH)
+_custom_tess = os.getenv("TESSERACT_PATH", r"C:\Program Files\Tesseract-OCR\tesseract.exe")
+if Path(_custom_tess).exists():
+    pytesseract.pytesseract.tesseract_cmd = _custom_tess
+elif shutil.which("tesseract"):
+    pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
 
 
 def ocr_pdf_page(page: fitz.Page, dpi: int = 200) -> str:

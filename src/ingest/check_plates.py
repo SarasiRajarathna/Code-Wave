@@ -34,5 +34,6 @@ for p in flagged:
     print()
 
 print("For each one: open that page in the PDF, look at the actual plate")
-print("image, and confirm the number by eye. Fix any wrong digits directly")
-print("in data/extracted/codex.json before this feeds into embeddings.")
+print("image, and confirm the number by eye. Add manual fixes and set")
+print('"plate_needs_review": false in data/plate_overrides.json so they')
+print("persist across re-running run_ingest.py before embedding.")

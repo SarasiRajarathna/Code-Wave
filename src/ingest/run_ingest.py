@@ -7,12 +7,16 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 import json
 from ingest.loaders import load_file
 from ingest.processors.wiki import process_wiki_page
-from ingest.processors.codex import extract_plate_text, merge_plates_into_pages
+from ingest.processors.codex import extract_plate_text, merge_plates_into_pages, load_plate_overrides
 
 corpus_root = REPO_ROOT / 'data' / 'corpus'          # your real corpus location
 output_dir = REPO_ROOT / 'data' / 'extracted'        # one JSON file per folder goes here
 
 output_dir.mkdir(parents=True, exist_ok=True)
+
+plate_overrides = load_plate_overrides()
+if plate_overrides:
+    print(f"Loaded {len(plate_overrides)} plate override entry/entries from data/plate_overrides.json\n")
 
 
 def dedupe_by_basename(files: list[Path]) -> list[Path]:
@@ -52,7 +56,7 @@ for folder in ['chronicles', 'wiki', 'codex', 'ephemera', 'images']:
 
             if folder == 'codex' and f.suffix.lower() == '.pdf':
                 plates = extract_plate_text(str(f))
-                pages = merge_plates_into_pages(pages, plates)
+                pages = merge_plates_into_pages(pages, plates, overrides=plate_overrides)
                 if plates:
                     print(f'  -> OCR found {len(plates)} figure plate(s) on this file')
 

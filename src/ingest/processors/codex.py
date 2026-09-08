@@ -24,7 +24,16 @@ import pymupdf as fitz
 import pytesseract
 from PIL import Image
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+import os
+import shutil
+from pathlib import Path
+
+# Robust Tesseract binary path discovery (Windows default, env var, or system PATH)
+_custom_tess = os.getenv("TESSERACT_PATH", r"C:\Program Files\Tesseract-OCR\tesseract.exe")
+if Path(_custom_tess).exists():
+    pytesseract.pytesseract.tesseract_cmd = _custom_tess
+elif shutil.which("tesseract"):
+    pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
 
 def extract_plate_text(pdf_path: str) -> list[dict]:
     """For every page in the PDF that has an embedded image, run OCR on

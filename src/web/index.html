@@ -716,31 +716,6 @@
       flex-shrink: 0;
     }
 
-    /* Follow-up Question Pills */
-    .follow-ups-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-    }
-
-    .follow-up-pill {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
-      color: var(--text-secondary);
-      font-size: 12.5px;
-      padding: 6px 12px;
-      border-radius: var(--radius-full);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .follow-up-pill:hover {
-      border-color: var(--brand);
-      color: var(--brand);
-      background: var(--brand-subtle);
-    }
-
     /* Conversational Loading State */
     .loading-row {
       display: none;
@@ -1377,10 +1352,6 @@
       if (msg.meta && (msg.meta.hops || msg.meta.contradictions)) {
         body.appendChild(buildVerification(msg.meta));
       }
-      // Follow-ups
-      if (msg.meta && msg.meta.investigation_leads && msg.meta.investigation_leads.length) {
-        body.appendChild(buildFollowUps(msg.meta.investigation_leads));
-      }
       // Copy action
       const actions = document.createElement('div');
       actions.className = 'message-actions';
@@ -1486,26 +1457,6 @@
     }
     det.appendChild(body);
     return det;
-  }
-
-  function buildFollowUps(leads) {
-    const sec = document.createElement('div');
-    sec.className = 'followups-section';
-    sec.innerHTML = `<div class="followups-header">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-      Suggested follow-ups:
-    </div>`;
-    const pills = document.createElement('div');
-    pills.className = 'followups-pills';
-    leads.slice(0, 3).forEach(lead => {
-      const pill = document.createElement('button');
-      pill.className = 'followup-pill';
-      pill.textContent = lead;
-      pill.onclick = () => submitQuestion(lead);
-      pills.appendChild(pill);
-    });
-    sec.appendChild(pills);
-    return sec;
   }
 
   function appendLoadingMsg() {

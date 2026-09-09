@@ -7,14 +7,22 @@ Handles chunk storage, metadata indexing, and similarity search queries.
 
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+import json
 import chromadb
 from chromadb.config import Settings
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]  # this file lives at src/db/vector_store.py
 
 
 class AshenVectorStore:
     """Vector database interface wrapping ChromaDB."""
-    def __init__(self, persist_directory: str = "data/vector_store", collection_name: str = "ashen_era_archive"):
-        self.persist_directory = Path(persist_directory)
+    def __init__(self, persist_directory: Optional[str] = None, collection_name: str = "ashen_era_archive"):
+        if persist_directory is not None:
+            self.persist_directory = Path(persist_directory)
+        else:
+            base_dir = Path(__file__).resolve().parent.parent.parent
+            self.persist_directory = base_dir / "data" / "vector_store"
+        
         self.persist_directory.mkdir(parents=True, exist_ok=True)
         self.collection_name = collection_name
 
@@ -44,6 +52,8 @@ class AshenVectorStore:
             metadatas = []
 
             for c in batch_chunks:
+                wikilinks = c.get("wikilinks") or []
+                infobox = c.get("infobox") or {}
                 meta = {
                     "source_file": str(c.get("source_file", "")),
                     "source_type": str(c.get("source_type", "")),
@@ -53,6 +63,13 @@ class AshenVectorStore:
                     "has_plate": bool(c.get("has_plate", False)),
                     "has_ocr": bool(c.get("has_ocr", False)),
                     "word_count": int(c.get("word_count", 0)),
+                    # Chroma metadata values must be str/int/float/bool --
+                    # lists and dicts aren't accepted, so wikilinks (a list)
+                    # is comma-joined and infobox (a dict) is JSON-encoded.
+                    # Both come back out with .split(", ") / json.loads()
+                    # on the retrieval side.
+                    "wikilinks": ", ".join(wikilinks) if wikilinks else "",
+                    "infobox": json.dumps(infobox) if infobox else "",
                 }
                 metadatas.append(meta)
 

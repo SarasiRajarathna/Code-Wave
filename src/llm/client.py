@@ -35,6 +35,8 @@ CRITICAL OPERATIONAL RULES:
 
 # Free and active OpenRouter models for fallback
 FALLBACK_MODELS = [
+    # OpenRouter's automatic free router is the most resilient first choice.
+    "openrouter/free",
     "minimax/minimax-m3:free",
     "minimax/minimax-m2.7:free",
     "liquid/lfm-2.5-2.6b:free",
@@ -53,7 +55,7 @@ class OpenRouterLLM:
         temperature: float = 0.1,
     ):
         self.api_key = api_key or os.getenv("OPENROUTER_API_KEY", "").strip()
-        self.model = model or os.getenv("OPENROUTER_MODEL", FALLBACK_MODELS[0])
+        self.model = (model or os.getenv("OPENROUTER_MODEL", FALLBACK_MODELS[0])).strip()
         self.max_retries = max_retries
         self.temperature = temperature
         self.cache = SimpleDiskCache()
@@ -118,13 +120,21 @@ class OpenRouterLLM:
                         temperature=temp,
                         max_tokens=800,
                     )
-                    answer = response.choices[0].message.content.strip()
+                    # Some providers can return a response with no text content.
+                    content = response.choices[0].message.content
+                    if content is None:
+                        raise RuntimeError(f"Model {current_model} returned empty content")
+                    answer = str(content).strip()
+                    if not answer:
+                        raise RuntimeError(f"Model {current_model} returned blank content")
                     self.cache.set(cache_key, answer)
                     return answer
                 except Exception as e:
                     last_err = e
                     err_str = str(e).lower()
-                    if "404" in err_str or "no endpoints found" in err_str or "unavailable for free" in err_str:
+                    if ("404" in err_str or "no endpoints found" in err_str
+                            or "unavailable for free" in err_str
+                            or "not found" in err_str):
                         # Model slug no longer available; switch immediately to next candidate
                         print(f"Model {current_model} unavailable on OpenRouter ({e}). Trying next model...")
                         break
@@ -183,6 +193,8 @@ class OpenRouterLLM:
                     err_str = str(e).lower()
                     if "429" in err_str or "rate limit" in err_str:
                         time.sleep(1.5)
+                    else:
+                        print(f"Stream request failed on {current_model}: {e}. Trying next model...")
                     continue
 
         # Offline fallback streaming: yield word by word with micro-delay
@@ -232,6 +244,6 @@ class OpenRouterLLM:
         synthesis = (
             "**[Grounded Archive Evidence]**\n\n"
             + "\n\n".join(f"> {s}" for s in top_sentences)
-            + "\n\n*(Note: Add your free OPENROUTER_API_KEY to .env for synthesized natural prose.)*"
+            + "\n\n*(Online natural-language synthesis was unavailable, so the answer above is a direct grounded extraction from the retrieved archive context.)*"
         )
         return synthesis

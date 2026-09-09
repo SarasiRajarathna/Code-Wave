@@ -20,8 +20,17 @@ def tokenize(text: str) -> List[str]:
 class AshenBM25Retriever:
     """BM25 retrieval engine over Ashen Era Archive chunks."""
 
-    def __init__(self, chunks_path: str = "data/extracted/chunks.json"):
-        self.chunks_path = Path(chunks_path)
+    def __init__(self, chunks_path: Optional[str] = None):
+        if chunks_path is not None:
+            self.chunks_path = Path(chunks_path)
+        else:
+            base_dir = Path(__file__).resolve().parent.parent.parent
+            self.chunks_path = base_dir / "data" / "extracted" / "chunks.json"
+        
+        # Fallback to local relative path if needed
+        if not self.chunks_path.exists() and Path("data/extracted/chunks.json").exists():
+            self.chunks_path = Path("data/extracted/chunks.json")
+
         self.chunks: List[Dict[str, Any]] = []
         self.corpus_tokens: List[List[str]] = []
         self.bm25 = None

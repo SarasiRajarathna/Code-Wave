@@ -1,0 +1,13 @@
+pymupdf
+python-docx
+pytesseract
+pillow
+chromadb
+sentence-transformers
+voyageai
+fastapi
+uvicorn
+pydantic
+rank-bm25
+openai
+python-dotenv

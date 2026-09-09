@@ -69,7 +69,34 @@ python src/run_vector_ingest.py --provider local
 python src/run_vector_ingest.py --provider voyage
 ```
 
-### 4. Query the Intelligent Assistant
+### 4. Launch the Interactive Web Explorer (Recommended)
+Launch the primary showcase interface (Dark-Fantasy Web Explorer with Sub-track 1C Human Investigation Trail & Sub-track 1A Rich Figure Plates):
+```bash
+python src/api.py
+```
+* **Interactive Web UI:** Open [http://localhost:8000/app](http://localhost:8000/app) in any modern browser.
+* **Interactive API Docs (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
+* **Features in UI:**
+  * 🧠 **Sub-track 1C:** Real-time multi-hop search, query decomposition, gap detection loop, knowledge graph traversal, and archivist critic.
+  * 🖼️ **Sub-track 1A:** Interactive Figure Plate cards with hover zoom preview and fullscreen Lightbox modal.
+  * 🛡️ **Zero-Hallucination:** Grounding verification badges and offline canonical synthesis.
+
+---
+
+## 🧪 Verification & Testing
+
+Run the full automated test suite verifying all 8 subsystems (Vector store, BM25, Hybrid RRF fusion, REST endpoints, SSE streaming, multi-turn memory, and live competition benchmarks):
+```bash
+# Backend unit & subsystem test:
+python src/test_backend.py
+
+# Complete FastAPI REST & Benchmark test:
+python src/test_api.py
+```
+
+---
+
+## 💻 CLI Usage
 
 #### Single Question Execution
 ```bash
@@ -81,8 +108,8 @@ python src/query.py --question "According to the figure plate, what is the recor
 python src/query.py --interactive
 ```
 
-#### Automated Benchmark Evaluation (for Member 3 testing)
-Run automated evaluation against the 20 benchmark competition questions:
+#### Automated Benchmark Evaluation
+Run automated evaluation against the benchmark competition questions:
 ```bash
 python src/query.py --eval ../Ashen_Era_Archive/Ashen_Era_Archive/sample_questions.json
 ```

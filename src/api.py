@@ -95,6 +95,9 @@ class RichMediaDetail(BaseModel):
     path: str
     markdown: str
     image_url: Optional[str] = None
+    plate_filename: Optional[str] = None
+    has_plate: bool = True
+    caption: Optional[str] = None
 
 
 class QueryResponse(BaseModel):
@@ -251,12 +254,17 @@ def query_agent(payload: QueryRequest):
         rich_media_dict = None
         if res.rich_media:
             p = Path(res.rich_media.get("path", ""))
-            image_url = f"/api/image/{p.name}" if p.name else None
+            filename = p.name
+            image_url = f"/api/image/{filename}" if filename else None
+            title_clean = res.rich_media.get("title", "Document Plate")
             rich_media_dict = RichMediaDetail(
-                title=res.rich_media.get("title", ""),
+                title=title_clean,
                 path=res.rich_media.get("path", ""),
                 markdown=res.rich_media.get("markdown", ""),
-                image_url=image_url
+                image_url=image_url,
+                plate_filename=filename,
+                has_plate=True,
+                caption=f"Canonical Figure Plate ({title_clean}) referenced in official archive records."
             )
 
         pinpointed = [

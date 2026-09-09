@@ -620,39 +620,81 @@
       line-height: 1.4;
     }
 
-    /* Attached Figure Plate Thumbnail */
-    .figure-attachment {
-      margin-top: 4px;
-      border: 1px solid var(--border-subtle);
+    /* ═══ SUB-TRACK 1A: RICH FIGURE PLATE CARDS ═══ */
+    .figure-plate-card {
+      margin-top: 14px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(217, 119, 6, 0.4);
       border-radius: var(--radius-md);
+      background: var(--bg-surface-elevated);
       overflow: hidden;
-      display: inline-flex;
-      flex-direction: column;
-      max-width: 320px;
-      background: var(--bg-subtle);
       cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+      max-width: 520px;
     }
-
-    .figure-attachment:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+    .figure-plate-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(217, 119, 6, 0.2);
+      border-color: var(--brand);
     }
-
-    .figure-attachment img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      display: block;
-    }
-
-    .figure-attachment-meta {
-      padding: 8px 12px;
+    .figure-plate-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.14), rgba(217, 119, 6, 0.04));
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .figure-plate-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--brand);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .figure-plate-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11.5px;
+      color: var(--brand);
+      font-weight: 600;
+    }
+    .figure-plate-img-wrap {
+      width: 100%;
+      height: 240px;
+      background: #080c14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .figure-plate-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      transition: transform 0.25s ease;
+    }
+    .figure-plate-card:hover .figure-plate-thumb {
+      transform: scale(1.03);
+    }
+    .figure-plate-info {
+      padding: 10px 14px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+    }
+    .figure-plate-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+    .figure-plate-caption {
       font-size: 12px;
-      color: var(--text-secondary);
+      color: var(--text-muted);
+      line-height: 1.45;
     }
 
     /* Assistant Footer Actions */
@@ -1430,6 +1472,10 @@
     if (!raw) return '';
     let text = esc(raw);
 
+    // Clean raw markdown image links so they don't display as raw text URLs
+    text = text.replace(/!\[(.*?)\]\((.*?)\)/g, '');
+    text = text.replace(/\*Figure:\s*.*?\*/g, '');
+
     // Convert headers
     text = text.replace(/^### (.+)$/gm, '<h4 style="font-size:14.5px;font-weight:700;color:var(--text-main);margin:12px 0 6px">$1</h4>');
     text = text.replace(/^## (.+)$/gm,  '<h3 style="font-size:15.5px;font-weight:700;color:var(--text-main);margin:14px 0 8px">$1</h3>');
@@ -1723,14 +1769,22 @@
     const card = document.createElement('div');
     card.className = 'figure-plate-card';
     card.onclick = () => openLightbox(media);
+    const imgUrl = media.image_url || (media.plate_filename ? `/api/image/${encodeURIComponent(media.plate_filename)}` : '');
+    const title = media.title || media.plate_title || 'Document Figure Plate';
+    const caption = media.caption || media.plate_caption || 'Verified canonical figure plate from Codex Vaeloria. Click to expand full view.';
     card.innerHTML = `
-      <img class="figure-plate-thumb" src="/api/image/${encodeURIComponent(media.plate_filename)}" alt="Document Plate" loading="lazy" />
-      <div class="figure-plate-info">
-        <div class="figure-plate-title">${esc(media.plate_title || 'Document Plate')}</div>
-        <div class="figure-plate-caption">${esc(media.plate_caption || 'Click to enlarge')}</div>
+      <div class="figure-plate-header">
+        <span class="figure-plate-badge">SUB-TRACK 1A: RICH MEDIA ASSET</span>
+        <span class="figure-plate-hint">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg> Enlarge Full View
+        </span>
       </div>
-      <div class="figure-plate-hint">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg> Enlarge
+      <div class="figure-plate-img-wrap">
+        <img class="figure-plate-thumb" src="${esc(imgUrl)}" alt="${esc(title)}" loading="lazy" />
+      </div>
+      <div class="figure-plate-info">
+        <div class="figure-plate-title">${esc(title)}</div>
+        <div class="figure-plate-caption">${esc(caption)}</div>
       </div>`;
     return card;
   }
@@ -1837,9 +1891,11 @@
      LIGHTBOX
   ────────────────────────────────────────────────── */
   function openLightbox(media) {
-    dom.lightboxImg.src    = `/api/image/${encodeURIComponent(media.plate_filename)}`;
-    dom.lightboxTitle.textContent  = media.plate_title || 'Document Plate';
-    dom.lightboxCaption.textContent = media.plate_caption || '';
+    if (!media) return;
+    const imgUrl = media.image_url || (media.plate_filename ? `/api/image/${encodeURIComponent(media.plate_filename)}` : '');
+    dom.lightboxImg.src = imgUrl;
+    dom.lightboxTitle.textContent = media.title || media.plate_title || 'Document Figure Plate';
+    dom.lightboxCaption.textContent = media.caption || media.plate_caption || '';
     dom.lightboxModal.classList.add('visible');
   }
   function closeLightbox() {
@@ -1929,13 +1985,49 @@
     trailBox.innerHTML = hopsHtml;
     body.appendChild(trailBox);
 
-    // 4. Knowledge Graph Traversal
+    // 4. Discovered Visual Evidence / Figure Plate (Sub-track 1A)
+    if (meta.rich_media && meta.rich_media.has_plate) {
+      const plateBox = document.createElement('div');
+      plateBox.className = 'trail-section-box';
+      const mImgUrl = meta.rich_media.image_url || (meta.rich_media.plate_filename ? `/api/image/${encodeURIComponent(meta.rich_media.plate_filename)}` : '');
+      const mTitle = meta.rich_media.title || meta.rich_media.plate_title || 'Canonical Figure Plate';
+      const mCap = meta.rich_media.caption || meta.rich_media.plate_caption || 'Verified figure plate discovered during archival inspection.';
+      plateBox.innerHTML = `
+        <div class="trail-sec-header">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          3. Multi-Modal Discovery: Archival Figure Plate (Sub-track 1A)
+        </div>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5;">
+          The investigation traversed to an illustrated folio containing canonical visual plate evidence:
+        </p>
+        <div class="figure-plate-card" style="margin-top:0;max-width:100%;">
+          <div class="figure-plate-header">
+            <span class="figure-plate-badge">SUB-TRACK 1A: RICH MEDIA ASSET</span>
+            <span class="figure-plate-hint">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg> Enlarge Full View
+            </span>
+          </div>
+          <div class="figure-plate-img-wrap" style="height:260px;">
+            <img class="figure-plate-thumb" src="${esc(mImgUrl)}" alt="${esc(mTitle)}" />
+          </div>
+          <div class="figure-plate-info">
+            <div class="figure-plate-title">${esc(mTitle)}</div>
+            <div class="figure-plate-caption">${esc(mCap)}</div>
+          </div>
+        </div>
+      `;
+      const cardEl = plateBox.querySelector('.figure-plate-card');
+      if (cardEl) cardEl.onclick = () => openLightbox(meta.rich_media);
+      body.appendChild(plateBox);
+    }
+
+    // 5. Knowledge Graph Traversal
     if (meta.kg_triplets && meta.kg_triplets.length) {
       const kgBox = document.createElement('div');
       kgBox.className = 'trail-section-box';
       let kgHtml = `<div class="trail-sec-header">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        3. Relational Knowledge Graph Connections
+        4. Relational Knowledge Graph Connections
       </div>
       <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">Entities and relational edges traversed across heterogeneous archive files:</p>
       <div style="display:flex;flex-wrap:wrap;gap:8px;">`;
@@ -1954,12 +2046,12 @@
       body.appendChild(kgBox);
     }
 
-    // 5. Archivist Critic & Contradiction Resolution
+    // 6. Archivist Critic & Contradiction Resolution
     const criticBox = document.createElement('div');
     criticBox.className = 'trail-section-box';
     let criticHtml = `<div class="trail-sec-header">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      4. Archivist Critic & Source Reliability Check
+      5. Archivist Critic & Source Reliability Check
     </div>`;
     if (meta.contradictions && meta.contradictions.length) {
       criticHtml += `<div style="background:rgba(217,119,6,0.1);border-left:3px solid var(--brand);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:10px 14px;font-size:12.5px;color:var(--text-main);margin-bottom:8px;">
@@ -1975,13 +2067,13 @@
     criticBox.innerHTML = criticHtml;
     body.appendChild(criticBox);
 
-    // 6. Visual Knowledge Traversal Graph (ASCII Tree)
+    // 7. Visual Knowledge Traversal Graph (ASCII Tree)
     if (meta.reasoning_graph) {
       const treeBox = document.createElement('div');
       treeBox.className = 'trail-section-box';
       treeBox.innerHTML = `<div class="trail-sec-header">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg>
-        5. Autonomous Knowledge Traversal Tree
+        6. Autonomous Knowledge Traversal Tree
       </div>
       <pre class="reasoning-tree-code">${esc(meta.reasoning_graph)}</pre>`;
       body.appendChild(treeBox);

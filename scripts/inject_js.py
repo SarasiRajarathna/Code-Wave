@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 from pathlib import Path
 
 path = Path(__file__).resolve().parent.parent / "src" / "web" / "index.html"
+=======
+path = r'c:\Users\sahil kavishka\Downloads\Code-Wave\Code-Wave\src\web\index.html'
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 
 js_block = r"""
 <script>

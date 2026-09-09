@@ -134,4 +134,8 @@ def load_file(path: str) -> list[dict]:
     elif ext in {".png", ".jpg", ".jpeg"}:
         return load_image(str(path))
     else:
+<<<<<<< HEAD
         raise ValueError(f"No loader for file type: {ext} ({path})")
+=======
+        raise ValueError(f"No loader for file type: {ext} ({path})")
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a

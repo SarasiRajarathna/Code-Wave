@@ -5,9 +5,12 @@ pillow
 chromadb
 sentence-transformers
 voyageai
+<<<<<<< HEAD
 fastapi
 uvicorn
 pydantic
+=======
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 rank-bm25
 openai
 python-dotenv

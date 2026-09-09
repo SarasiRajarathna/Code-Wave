@@ -77,6 +77,10 @@ class QueryRequest(BaseModel):
     question: str = Field(..., example="According to the figure plate, what is the recorded garrison strength of Greyfell Citadel?")
     max_hops: Optional[int] = Field(3, ge=1, le=5, description="Maximum number of search reasoning hops")
     no_cache: Optional[bool] = Field(False, description="Bypass disk response cache if True")
+<<<<<<< HEAD
+=======
+    session_id: Optional[str] = Field(None, description="Optional conversation session ID for multi-turn dialogues")
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 
 
 class HopDetail(BaseModel):
@@ -95,6 +99,12 @@ class RichMediaDetail(BaseModel):
     path: str
     markdown: str
     image_url: Optional[str] = None
+<<<<<<< HEAD
+    plate_filename: Optional[str] = None
+    has_plate: bool = True
+    caption: Optional[str] = None
+=======
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 
 
 class QueryResponse(BaseModel):
@@ -124,6 +134,13 @@ class QueryResponse(BaseModel):
     epistemic_calibration: Optional[Dict[str, Any]] = None
     hypotheses_branches: Optional[Dict[str, Any]] = None
     source_pedigree: Optional[Dict[str, Any]] = None
+<<<<<<< HEAD
+=======
+    cognitive_scratchpad: Optional[Dict[str, Any]] = None
+    coreference_resolution: Optional[Dict[str, Any]] = None
+    scepticism_index: Optional[Dict[str, Any]] = None
+    session_id: Optional[str] = None
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 
 
 class SampleQuestion(BaseModel):
@@ -245,18 +262,36 @@ def query_agent(payload: QueryRequest):
         agent.max_hops = payload.max_hops
 
     try:
+<<<<<<< HEAD
         res = agent.run(payload.question, verbose=False, no_cache=payload.no_cache)
+=======
+        res = agent.run(payload.question, verbose=False, no_cache=payload.no_cache, session_id=payload.session_id)
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 
         # Convert rich media and format image URL if present
         rich_media_dict = None
         if res.rich_media:
             p = Path(res.rich_media.get("path", ""))
+<<<<<<< HEAD
+            filename = p.name
+            image_url = f"/api/image/{filename}" if filename else None
+            title_clean = res.rich_media.get("title", "Document Plate")
+            rich_media_dict = RichMediaDetail(
+                title=title_clean,
+                path=res.rich_media.get("path", ""),
+                markdown=res.rich_media.get("markdown", ""),
+                image_url=image_url,
+                plate_filename=filename,
+                has_plate=True,
+                caption=f"Canonical Figure Plate ({title_clean}) referenced in official archive records."
+=======
             image_url = f"/api/image/{p.name}" if p.name else None
             rich_media_dict = RichMediaDetail(
                 title=res.rich_media.get("title", ""),
                 path=res.rich_media.get("path", ""),
                 markdown=res.rich_media.get("markdown", ""),
                 image_url=image_url
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
             )
 
         pinpointed = [
@@ -295,7 +330,15 @@ def query_agent(payload: QueryRequest):
             resolved_aliases=getattr(res, "resolved_aliases", []),
             epistemic_calibration=getattr(res, "epistemic_calibration", None),
             hypotheses_branches=getattr(res, "hypotheses_branches", None),
+<<<<<<< HEAD
             source_pedigree=getattr(res, "source_pedigree", None)
+=======
+            source_pedigree=getattr(res, "source_pedigree", None),
+            cognitive_scratchpad=getattr(res, "cognitive_scratchpad", None),
+            coreference_resolution=getattr(res, "coreference_resolution", None),
+            scepticism_index=getattr(res, "scepticism_index", None),
+            session_id=getattr(res, "session_id", None)
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI Agent query execution failed: {str(e)}")
@@ -305,7 +348,11 @@ def query_agent(payload: QueryRequest):
 def query_agent_stream(payload: QueryRequest):
     """
     Stream human-like iterative reasoning steps and synthesis answer in real-time via Server-Sent Events (SSE).
+<<<<<<< HEAD
     Yields events: stage, kg_triplets, hop_start, hop_complete, token, and final_result.
+=======
+    Yields events: stage, kg_triplets, hop_start, hop_complete, token, metacognition, and final_result.
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
     """
     if not payload.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
@@ -316,7 +363,11 @@ def query_agent_stream(payload: QueryRequest):
 
     def sse_event_generator():
         try:
+<<<<<<< HEAD
             for event in agent.run_stream(payload.question, no_cache=payload.no_cache):
+=======
+            for event in agent.run_stream(payload.question, no_cache=payload.no_cache, session_id=payload.session_id):
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
                 yield f"data: {json.dumps(event)}\n\n"
         except Exception as err:
             err_payload = {"event": "error", "data": {"message": str(err)}}
@@ -333,6 +384,19 @@ def query_agent_stream(payload: QueryRequest):
     )
 
 
+<<<<<<< HEAD
+=======
+@app.post("/api/conversation/reset", tags=["Conversational Memory"])
+def reset_conversation(session_id: Optional[str] = None):
+    """Reset a conversation session thread or clear active dialogue memory."""
+    agent = get_agent()
+    if session_id:
+        agent.conversation.reset_session(session_id)
+        return {"status": "success", "message": f"Session '{session_id}' reset."}
+    return {"status": "success", "message": "All sessions active."}
+
+
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 @app.get("/api/graph", tags=["Knowledge Graph"])
 def get_knowledge_graph():
     """Return the entire archival Knowledge Graph topology, nodes, and relational edges."""

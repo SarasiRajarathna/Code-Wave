@@ -1468,6 +1468,23 @@
     setTimeout(() => dom.appToast.classList.remove('visible'), ms);
   }
 
+  function hasRichMedia(media) {
+    if (!media) return false;
+    return Boolean(media.image_url || media.path || media.plate_filename || media.has_plate || (media.title && media.title !== 'None'));
+  }
+
+  function getMediaUrl(media) {
+    if (!media) return '';
+    if (media.image_url) return media.image_url;
+    if (media.plate_filename) return `/api/image/${encodeURIComponent(media.plate_filename)}`;
+    if (media.path) {
+      const clean = String(media.path).replace(/\\/g, '/');
+      const filename = clean.split('/').pop();
+      if (filename) return `/api/image/${encodeURIComponent(filename)}`;
+    }
+    return '';
+  }
+
   function formatMd(raw) {
     if (!raw) return '';
     let text = esc(raw);
@@ -1709,7 +1726,7 @@
       bubble.innerHTML = formatMd(msg.content);
       body.appendChild(bubble);
       // Figure plate
-      if (msg.meta && msg.meta.rich_media && msg.meta.rich_media.has_plate) {
+      if (msg.meta && hasRichMedia(msg.meta.rich_media)) {
         body.appendChild(buildFigurePlate(msg.meta.rich_media));
       }
       // Sources
@@ -1769,7 +1786,7 @@
     const card = document.createElement('div');
     card.className = 'figure-plate-card';
     card.onclick = () => openLightbox(media);
-    const imgUrl = media.image_url || (media.plate_filename ? `/api/image/${encodeURIComponent(media.plate_filename)}` : '');
+    const imgUrl = getMediaUrl(media);
     const title = media.title || media.plate_title || 'Document Figure Plate';
     const caption = media.caption || media.plate_caption || 'Verified canonical figure plate from Codex Vaeloria. Click to expand full view.';
     card.innerHTML = `
@@ -1892,10 +1909,10 @@
   ────────────────────────────────────────────────── */
   function openLightbox(media) {
     if (!media) return;
-    const imgUrl = media.image_url || (media.plate_filename ? `/api/image/${encodeURIComponent(media.plate_filename)}` : '');
+    const imgUrl = getMediaUrl(media);
     dom.lightboxImg.src = imgUrl;
     dom.lightboxTitle.textContent = media.title || media.plate_title || 'Document Figure Plate';
-    dom.lightboxCaption.textContent = media.caption || media.plate_caption || '';
+    dom.lightboxCaption.textContent = media.caption || media.plate_caption || 'Verified canonical figure plate from archive records.';
     dom.lightboxModal.classList.add('visible');
   }
   function closeLightbox() {
@@ -1986,10 +2003,10 @@
     body.appendChild(trailBox);
 
     // 4. Discovered Visual Evidence / Figure Plate (Sub-track 1A)
-    if (meta.rich_media && meta.rich_media.has_plate) {
+    if (meta.rich_media && hasRichMedia(meta.rich_media)) {
       const plateBox = document.createElement('div');
       plateBox.className = 'trail-section-box';
-      const mImgUrl = meta.rich_media.image_url || (meta.rich_media.plate_filename ? `/api/image/${encodeURIComponent(meta.rich_media.plate_filename)}` : '');
+      const mImgUrl = getMediaUrl(meta.rich_media);
       const mTitle = meta.rich_media.title || meta.rich_media.plate_title || 'Canonical Figure Plate';
       const mCap = meta.rich_media.caption || meta.rich_media.plate_caption || 'Verified figure plate discovered during archival inspection.';
       plateBox.innerHTML = `

@@ -2,7 +2,11 @@ __pycache__/
 *.pyc
 .venv/
 .env
+<<<<<<< HEAD
 data/corpus
+=======
+data/corpus/
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 data/vector_store/
 data/.cache/
 data/evaluation_results.json

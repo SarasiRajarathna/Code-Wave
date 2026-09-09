@@ -35,8 +35,11 @@ CRITICAL OPERATIONAL RULES:
 
 # Free and active OpenRouter models for fallback
 FALLBACK_MODELS = [
+<<<<<<< HEAD
     # OpenRouter's automatic free router is the most resilient first choice.
     "openrouter/free",
+=======
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
     "minimax/minimax-m3:free",
     "minimax/minimax-m2.7:free",
     "liquid/lfm-2.5-2.6b:free",
@@ -55,7 +58,11 @@ class OpenRouterLLM:
         temperature: float = 0.1,
     ):
         self.api_key = api_key or os.getenv("OPENROUTER_API_KEY", "").strip()
+<<<<<<< HEAD
         self.model = (model or os.getenv("OPENROUTER_MODEL", FALLBACK_MODELS[0])).strip()
+=======
+        self.model = model or os.getenv("OPENROUTER_MODEL", FALLBACK_MODELS[0])
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
         self.max_retries = max_retries
         self.temperature = temperature
         self.cache = SimpleDiskCache()
@@ -120,6 +127,7 @@ class OpenRouterLLM:
                         temperature=temp,
                         max_tokens=800,
                     )
+<<<<<<< HEAD
                     # Some providers can return a response with no text content.
                     content = response.choices[0].message.content
                     if content is None:
@@ -127,14 +135,21 @@ class OpenRouterLLM:
                     answer = str(content).strip()
                     if not answer:
                         raise RuntimeError(f"Model {current_model} returned blank content")
+=======
+                    answer = response.choices[0].message.content.strip()
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
                     self.cache.set(cache_key, answer)
                     return answer
                 except Exception as e:
                     last_err = e
                     err_str = str(e).lower()
+<<<<<<< HEAD
                     if ("404" in err_str or "no endpoints found" in err_str
                             or "unavailable for free" in err_str
                             or "not found" in err_str):
+=======
+                    if "404" in err_str or "no endpoints found" in err_str or "unavailable for free" in err_str:
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
                         # Model slug no longer available; switch immediately to next candidate
                         print(f"Model {current_model} unavailable on OpenRouter ({e}). Trying next model...")
                         break
@@ -193,8 +208,11 @@ class OpenRouterLLM:
                     err_str = str(e).lower()
                     if "429" in err_str or "rate limit" in err_str:
                         time.sleep(1.5)
+<<<<<<< HEAD
                     else:
                         print(f"Stream request failed on {current_model}: {e}. Trying next model...")
+=======
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
                     continue
 
         # Offline fallback streaming: yield word by word with micro-delay
@@ -208,7 +226,11 @@ class OpenRouterLLM:
 
     def _synthesize_offline(self, prompt: str) -> str:
         """Deterministic offline answer extractor when API key is not supplied.
+<<<<<<< HEAD
         Extracts verified canonical facts and formats them into a clean, structured intelligence report."""
+=======
+        Directly extracts grounded evidence sentences from the prompt context."""
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
         # Find Context section
         if "CONTEXT PASSAGES:" in prompt:
             context_block = prompt.split("CONTEXT PASSAGES:")[1]
@@ -217,6 +239,7 @@ class OpenRouterLLM:
         else:
             context_block = prompt
 
+<<<<<<< HEAD
         question_str = ""
         if "QUESTION:" in prompt:
             question_str = prompt.split("QUESTION:")[1].strip().split("\n")[0].strip()
@@ -229,6 +252,14 @@ class OpenRouterLLM:
             cleaned = re.sub(r"^\[.*?\]\s*", "", l).strip()
             # Clean leading markdown headers
             cleaned = re.sub(r"^#+\s*", "", cleaned)
+=======
+        lines = [line.strip() for line in context_block.splitlines() if line.strip()]
+        informative = []
+        for l in lines:
+            if l.startswith("Passage"):
+                continue
+            cleaned = re.sub(r"^\[.*?\]\s*", "", l).strip()
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
             if len(cleaned) > 15:
                 informative.append(cleaned)
 
@@ -238,13 +269,20 @@ class OpenRouterLLM:
         # Prioritize lines with concrete numbers, dates, or key terms
         def _score_line(s: str) -> int:
             sl = s.lower()
+<<<<<<< HEAD
             if any(k in sl for k in ["garrison strength", "victor", "casualties", "founded", "forged", "rating", "attunement cost", "member of", "born in"]):
                 return 0
             if any(k in sl for k in ["recorded", "plate", "conflict", "accord", "classification", "serves as"]):
+=======
+            if any(k in sl for k in ["garrison strength", "victor", "casualties", "founded", "forged", "rating", "attunement cost", "member of"]):
+                return 0
+            if any(k in sl for k in ["recorded", "plate", "conflict", "accord"]):
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
                 return 1
             return 2
 
         informative.sort(key=_score_line)
+<<<<<<< HEAD
         top_candidates = informative[:3]
 
         # Extract direct answer summary
@@ -294,3 +332,13 @@ class OpenRouterLLM:
         output_parts.append("\n*(Offline Grounded Synthesis: Verified directly against primary archive records with zero hallucination.)*")
 
         return "\n\n".join(output_parts)
+=======
+        top_sentences = informative[:2]
+
+        synthesis = (
+            "**[Grounded Archive Evidence]**\n\n"
+            + "\n\n".join(f"> {s}" for s in top_sentences)
+            + "\n\n*(Note: Add your free OPENROUTER_API_KEY to .env for synthesized natural prose.)*"
+        )
+        return synthesis
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a

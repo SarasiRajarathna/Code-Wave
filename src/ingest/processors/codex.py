@@ -18,14 +18,20 @@ here we're OCRing a small graphic embedded within an otherwise-normal
 text page.
 """
 
+<<<<<<< HEAD
 import json
 import io
 import re
 from pathlib import Path
+=======
+import io
+import re
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 import pymupdf as fitz
 import pytesseract
 from PIL import Image
 
+<<<<<<< HEAD
 import os
 import shutil
 from pathlib import Path
@@ -101,6 +107,9 @@ def get_override_for_page(overrides: dict, source_file: str, page_num: int) -> d
     full_key = (str(source_file).lower(), page_num)
     return overrides.get(name_key) or overrides.get(stem_key) or overrides.get(full_key)
 
+=======
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 
 def extract_plate_text(pdf_path: str) -> list[dict]:
     """For every page in the PDF that has an embedded image, run OCR on
@@ -176,11 +185,16 @@ def extract_plate_text(pdf_path: str) -> list[dict]:
     return results
 
 
+<<<<<<< HEAD
 def merge_plates_into_pages(pages: list[dict], plates: list[dict], overrides: dict | None = None) -> list[dict]:
+=======
+def merge_plates_into_pages(pages: list[dict], plates: list[dict]) -> list[dict]:
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
     """Takes the normal page dicts from loaders.load_pdf() and the OCR'd
     plate results from extract_plate_text(), and merges the plate text
     into the matching page's text -- so downstream chunking/embedding
     sees the plate's numbers as part of that page's content, not lost.
+<<<<<<< HEAD
 
     If manual overrides are present in data/plate_overrides.json (or passed in),
     they override the OCR output and review flags for specified pages.
@@ -188,6 +202,9 @@ def merge_plates_into_pages(pages: list[dict], plates: list[dict], overrides: di
     if overrides is None:
         overrides = load_plate_overrides()
 
+=======
+    """
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
     plates_by_page = {}
     for p in plates:
         plates_by_page.setdefault(p["page"], []).append(p)
@@ -195,6 +212,7 @@ def merge_plates_into_pages(pages: list[dict], plates: list[dict], overrides: di
     merged = []
     for page in pages:
         page = dict(page)
+<<<<<<< HEAD
         page_num = page.get("page")
         source_file = page.get("source_file", "")
 
@@ -219,6 +237,10 @@ def merge_plates_into_pages(pages: list[dict], plates: list[dict], overrides: di
                 page["has_plate"] = False
                 page["plate_needs_review"] = False
         elif page_plates:
+=======
+        page_plates = plates_by_page.get(page["page"], [])
+        if page_plates:
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
             plate_block = "\n\n[FIGURE PLATE TEXT]\n" + "\n---\n".join(p["plate_text"] for p in page_plates)
             page["text"] = page["text"] + plate_block
             page["has_plate"] = True
@@ -226,8 +248,14 @@ def merge_plates_into_pages(pages: list[dict], plates: list[dict], overrides: di
         else:
             page["has_plate"] = False
             page["plate_needs_review"] = False
+<<<<<<< HEAD
 
         merged.append(page)
 
     return merged
 
+=======
+        merged.append(page)
+
+    return merged
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a

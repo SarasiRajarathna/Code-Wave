@@ -20,6 +20,7 @@ def tokenize(text: str) -> List[str]:
 class AshenBM25Retriever:
     """BM25 retrieval engine over Ashen Era Archive chunks."""
 
+<<<<<<< HEAD
     def __init__(self, chunks_path: Optional[str] = None):
         if chunks_path is not None:
             self.chunks_path = Path(chunks_path)
@@ -31,6 +32,10 @@ class AshenBM25Retriever:
         if not self.chunks_path.exists() and Path("data/extracted/chunks.json").exists():
             self.chunks_path = Path("data/extracted/chunks.json")
 
+=======
+    def __init__(self, chunks_path: str = "data/extracted/chunks.json"):
+        self.chunks_path = Path(chunks_path)
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
         self.chunks: List[Dict[str, Any]] = []
         self.corpus_tokens: List[List[str]] = []
         self.bm25 = None

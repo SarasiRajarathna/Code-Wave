@@ -12,8 +12,11 @@ import hashlib
 from pathlib import Path
 from collections import defaultdict
 
+<<<<<<< HEAD
 REPO_ROOT = Path(__file__).resolve().parents[2]  # this file lives at src/ingest/chunk.py
 
+=======
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
 
 CHAPTER_PATTERN = re.compile(
     r"^\s*(Chapter\s+[\dIVXLCM]+|CHAPTER\s+[\dIVXLCM]+|Chapter\s+\w+)\b.*$",
@@ -82,8 +85,11 @@ def chunk_pages(pages: list[dict], chunk_size: int = 400, overlap: int = 75) -> 
                 "title": page.get("title"),
                 "has_plate": page.get("has_plate", False),
                 "has_ocr": page.get("has_ocr", False),
+<<<<<<< HEAD
                 "wikilinks": page.get("wikilinks"),  # list[str] or None -- wiki pages only
                 "infobox": page.get("infobox"),       # dict or None -- wiki pages only
+=======
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
                 "word_count": len(piece.split()),
                 "char_count": len(piece),
             }
@@ -149,10 +155,15 @@ def chunk_chronicles_by_chapter(pages: list[dict], chunk_size: int = 400, overla
     return all_chunks
 
 
+<<<<<<< HEAD
 def process_and_save_all_chunks(extracted_dir: str = None, output_file: str = None) -> list[dict]:
     """Read extracted JSON files for all folders, chunk them intelligently, and save to chunks.json."""
     extracted_dir = extracted_dir or str(REPO_ROOT / "data" / "extracted")
     output_file = output_file or str(REPO_ROOT / "data" / "extracted" / "chunks.json")
+=======
+def process_and_save_all_chunks(extracted_dir: str = "data/extracted", output_file: str = "data/extracted/chunks.json") -> list[dict]:
+    """Read extracted JSON files for all folders, chunk them intelligently, and save to chunks.json."""
+>>>>>>> aeb2852b64774d175569b8a8f8fdafea56a6bf0a
     extracted_path = Path(extracted_dir)
     all_chunks = []
 

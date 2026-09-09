@@ -1,0 +1,9 @@
+{
+  "_comment": "Manual plate OCR overrides for codex files. Key by filename (or stem) -> page number (as string or int) -> override dict.",
+  "codex_vaeloria_i_gazetteer_of_the_sundered_realms.pdf": {
+    "14": {
+      "plate_text": "Emberdeep - Recorded Garrison Strength\n\n800\n\nOld Imperial minimum\n\n2,400\n\nBorder-march standard\n\n6,000\n\nGreat Keep standard\n\n1,114\n\nEmberdeep\n\nMeasured in souls under arms.",
+      "plate_needs_review": false
+    }
+  }
+}
